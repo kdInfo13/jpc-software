@@ -1,6 +1,5 @@
-# [Vue Light Bootstrap Dashboard](http://vuejs.creative-tim.com/vue-light-bootstrap-dashboard) [![version][version-badge]][changelog] [![license][license-badge]][license]
+# [JPC Property Software]
 
-> Admin dashboard based on light bootstrap dashboard UI template + vue-router
 ## :cloud: Build Setup
 
 ### install dependencies

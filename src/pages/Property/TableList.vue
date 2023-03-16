@@ -6,7 +6,9 @@
           <card class="card-plain">
           <div class="row">
             <div class="col-6"><h4 class="card-title">Property List</h4></div>
-            <div class="col-6"><router-link class="d-flex justify-content-end" to="/admin/new-property">Add New</router-link></div>
+            <div class="col-6">
+              <router-link class="d-flex justify-content-end" to="/admin/new-property">Add New</router-link>
+            </div>
           </div>
             <div class="table-responsive">
               <table class="table">

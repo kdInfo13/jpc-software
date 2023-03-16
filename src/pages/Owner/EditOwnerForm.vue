@@ -13,6 +13,9 @@
                             placeholder="Full Name"
                             v-model="user.firstName">
                   </base-input>
+                  <div v-if="isSubmitted && $v.user.firstName.$error" class="invalid-feedback">
+                    <span v-if="!$v.user.firstName.required">Full name field is required.</span>
+                  </div>
                 </div>
                 <div class="col-md-4">
                   <base-input type="email"
@@ -20,6 +23,9 @@
                             placeholder="Email"
                             v-model="user.email">
                   </base-input>
+                  <div v-if="isSubmitted && $v.user.email.$error" class="invalid-feedback">
+                    <span v-if="!$v.user.email.required">Email field is required.</span>
+                  </div>
                 </div>
                 <div class="col-md-4">
                   <base-input type="tel"
@@ -27,6 +33,9 @@
                             placeholder="Phone"
                             v-model="user.phone">
                   </base-input>
+                  <div v-if="isSubmitted && $v.user.phone.$error" class="invalid-feedback">
+                    <span v-if="!$v.user.phone.required">Phone field is required.</span>
+                  </div>
                 </div>
               </div>
               <div class="row">
@@ -36,6 +45,9 @@
                             placeholder="Home Address"
                             v-model="user.address">
                   </base-input>
+                  <div v-if="isSubmitted && $v.user.address.$error" class="invalid-feedback">
+                    <span v-if="!$v.user.address.required">Address field is required.</span>
+                  </div>
                 </div>
               </div>
 
@@ -46,6 +58,9 @@
                             placeholder="City"
                             v-model="user.city">
                   </base-input>
+                  <div v-if="isSubmitted && $v.user.city.$error" class="invalid-feedback">
+                    <span v-if="!$v.user.city.required">City field is required.</span>
+                  </div>
                 </div>
                 <div class="col-md-4">
                   <base-input type="text"
@@ -53,6 +68,9 @@
                             placeholder="State"
                             v-model="user.state">
                   </base-input>
+                  <div v-if="isSubmitted && $v.user.state.$error" class="invalid-feedback">
+                    <span v-if="!$v.user.state.required">State field is required.</span>
+                  </div>
                 </div>
                 <div class="col-md-4">
                   <base-input type="number"
@@ -60,16 +78,22 @@
                             placeholder="ZIP Code"
                             v-model="user.postalCode">
                   </base-input>
+                  <div v-if="isSubmitted && $v.user.postalCode.$error" class="invalid-feedback">
+                    <span v-if="!$v.user.postalCode.required">Postal Code field is required.</span>
+                  </div>
                 </div>
               </div>
 
               <div class="row">
                 <div class="col-md-4">
                   <label>Type</label>
-                    <select v-model="type" class="form-control">
+                    <select v-model="user.type" class="form-control">
                       <option>Owner</option>
                       <option>Investors</option>
                     </select>
+                    <div v-if="isSubmitted && $v.user.type.$error" class="invalid-feedback">
+                    <span v-if="!$v.user.type.required">Please select any type.</span>
+                  </div>
                 </div>
               </div>
 
@@ -87,6 +111,10 @@
 </div>
 </template>
 <script>
+  import {
+        required,
+        email,
+    } from "vuelidate/lib/validators";
 import Card from 'src/components/Cards/Card.vue'
 
 export default {
@@ -99,17 +127,34 @@ export default {
         email: '',
         firstName: '',
         phone: '',
-        email: '',
         address: '',
         city: '',
         state: '',
         postalCode: '',
         type: '',
-      }
+      },
+      isSubmitted: false
     }
   },
+  validations: {
+    user: {
+        email:{required, email},
+        firstName: {required},
+        phone: {required},
+        address:{required},
+        city:{required},
+        state:{required},
+        postalCode:{required},
+        type : {required}
+      }
+    },
   methods: {
     saveProfile () {
+        this.isSubmitted = true;
+        this.$v.$touch();
+        if (this.$v.$invalid) {
+            return;
+        }
       alert('Your data: ' + JSON.stringify(this.user))
     }
   }

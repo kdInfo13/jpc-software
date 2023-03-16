@@ -6,7 +6,7 @@
             <card>
               <h4 slot="header" class="card-title">Add New Property</h4>
               <form>
-                <div v-if="!nextopen">
+                <div>
                   <div class="row">
                     <div class="col-md-4">
                       <base-input type="text"
@@ -14,6 +14,9 @@
                                 placeholder="Property Name"
                                 v-model="user.propertyName">
                       </base-input>
+                      <div v-if="isSubmitted && $v.user.propertyName.$error" class="invalid-feedback">
+                        <span v-if="!$v.user.propertyName.required">Property name field is required.</span>
+                    </div>
                     </div>
                     <div class="col-md-8">
                       <base-input type="text"
@@ -21,6 +24,9 @@
                                 placeholder="Property Address"
                                 v-model="user.address">
                       </base-input>
+                        <div v-if="isSubmitted && $v.user.address.$error" class="invalid-feedback">
+                          <span v-if="!$v.user.address.required">Address field is required.</span>
+                      </div>
                     </div>
                   </div>
     
@@ -31,6 +37,9 @@
                                 placeholder="City"
                                 v-model="user.city">
                       </base-input>
+                      <div v-if="isSubmitted && $v.user.city.$error" class="invalid-feedback">
+                          <span v-if="!$v.user.city.required">city field is required.</span>
+                      </div>
                     </div>
                     <div class="col-md-4">
                       <base-input type="text"
@@ -38,6 +47,9 @@
                                 placeholder="State"
                                 v-model="user.state">
                       </base-input>
+                      <div v-if="isSubmitted && $v.user.state.$error" class="invalid-feedback">
+                          <span v-if="!$v.user.state.required">state field is required.</span>
+                      </div>
                     </div>
                     <div class="col-md-4">
                       <base-input type="number"
@@ -45,6 +57,9 @@
                                 placeholder="ZIP Code"
                                 v-model="user.postalCode">
                       </base-input>
+                      <div v-if="isSubmitted && $v.user.postalCode.$error" class="invalid-feedback">
+                          <span v-if="!$v.user.postalCode.required">Postal Code field is required.</span>
+                      </div>
                     </div>
                   </div>
 
@@ -67,6 +82,9 @@
                         primaryText="File name"
                         markIsPrimaryText="File Name"
                         ></vue-upload-multiple-image>
+                        <!-- <div v-if="isSubmitted && $v.user.property_images.$error" class="invalid-feedback">
+                            <span v-if="!$v.user.property_images.required">Minimum one image is required.</span>
+                        </div> -->
                     </div>
                   </div>
 
@@ -78,8 +96,11 @@
                       <base-input typep="text"
                       label="No. of Bedrooms"
                       placeholder="No. of Bedrooms"
-                      v-model="user.bed_rooms" >
+                      v-model="user.bed_room" >
                       </base-input>
+                      <div v-if="isSubmitted && $v.user.bed_room.$error" class="invalid-feedback">
+                          <span v-if="!$v.user.bed_room.required">Bed room field is required.</span>
+                      </div>
                     </div>
                     <div class="col-md-3">
                       <base-input typep="text"
@@ -87,6 +108,9 @@
                       placeholder="No. of Livingroom"
                       v-model="user.living_room" >
                       </base-input>
+                      <div v-if="isSubmitted && $v.user.living_room.$error" class="invalid-feedback">
+                          <span v-if="!$v.user.living_room.required">Living room field is required.</span>
+                      </div>
                     </div>
                     <div class="col-md-3">
                       <base-input typep="text"
@@ -94,6 +118,9 @@
                       placeholder="No. of Kitchen"
                       v-model="user.kitchen" >
                       </base-input>
+                      <div v-if="isSubmitted && $v.user.kitchen.$error" class="invalid-feedback">
+                          <span v-if="!$v.user.kitchen.required">Kitchen field is required.</span>
+                      </div>
                     </div>
                     <div class="col-md-3">
                       <base-input typep="text"
@@ -101,6 +128,9 @@
                       placeholder="No. of Bathrooms"
                       v-model="user.bathroom" >
                       </base-input>
+                      <div v-if="isSubmitted && $v.user.bathroom.$error" class="invalid-feedback">
+                          <span v-if="!$v.user.bathroom.required">Bathroom field is required.</span>
+                      </div>
                     </div>
                   </div>
 
@@ -110,13 +140,13 @@
                       <div class=" d-flex">
                         <div class="form-check-radio">
                           <label class="form-check-label">
-                            <input type="radio" id="yes" :value=1 v-model="user.front_garden" />
+                            <input type="radio" id="yes" :value=1 v-model="user.front_garden"  v-on:change="showImageBox" />
                             <span class="form-check-sign">Yes</span>
                           </label>
                         </div>
                         <div class="form-check-radio">
                           <label class="form-check-label">
-                            <input type="radio" id="no" :value=0 v-model="user.front_garden" />
+                            <input type="radio" id="no" :value=0 v-model="user.front_garden" v-on:change="showImageBox" />
                             <span class="form-check-sign">No</span>
                           </label>
                         </div>
@@ -127,42 +157,61 @@
                       <div class=" d-flex">
                         <div class="form-check-radio">
                           <label class="form-check-label">
-                            <input type="radio" id="back_yes" :value=1 v-model="user.back_garden" />
+                            <input type="radio" id="back_yes" :value=1 v-model="user.back_garden" v-on:change="showImageBoxBack" />
                             <span class="form-check-sign">Yes</span>
                           </label>
                         </div>
                         <div class="form-check-radio">
                           <label class="form-check-label">
-                            <input type="radio" id="back_no" :value=0 v-model="user.back_garden" />
+                            <input type="radio" id="back_no" :value=0 v-model="user.back_garden" v-on:change="showImageBoxBack" />
                             <span class="form-check-sign">No</span>
                           </label>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-                <div v-if="nextopen">
-                  <div class="row">
-                    <div class="col-md-12">
-                      <amenities-image :name="user.room_images" :input-name=user.room_name id="room_image" :number-room=user.bed_room :maximage=5></amenities-image>
+                    <div class="col-md-6" v-if="showFrontGarden">
+                      <label>Front Garden Image</label>
+                      <vue-upload-multiple-image
+                        @upload-success="uploadImageSuccess"
+                        @before-remove="beforeRemove"
+                        @edit-image="editImage"
+                        :data-images="user.property_images"
+                        idUpload="myIdUpload"
+                        :maxImage=5
+                        accept="image/gif,image/jpeg,image/png,image/bmp,image/jpg"
+                        editUpload="myIdEdit"
+                        dragText="Drop here"
+                        browseText="Upload images"
+                        primaryText="File name"
+                        markIsPrimaryText="File Name"
+                        ></vue-upload-multiple-image>
+                    </div>
+                    <div class="col-md-6" v-if="showBackGarden">
+                      <label>Back Garden Image</label>
+                      <vue-upload-multiple-image
+                        @upload-success="uploadImageSuccess"
+                        @before-remove="beforeRemove"
+                        @edit-image="editImage"
+                        :data-images="user.property_images"
+                        idUpload="myIdUpload"
+                        :maxImage=5
+                        accept="image/gif,image/jpeg,image/png,image/bmp,image/jpg"
+                        editUpload="myIdEdit"
+                        dragText="Drop here"
+                        browseText="Upload images"
+                        primaryText="File name"
+                        markIsPrimaryText="File Name"
+                        ></vue-upload-multiple-image>
                     </div>
                   </div>
                 </div>
-                <div class="row mt-4" v-if="!nextopen">
-                  <div class="col-md-12">
-                    <button type="button" class="btn bnt-info btn-fill float-right" @click.prevent="nextOpen">Next</button>
-                  </div>
-                </div>
+              
+            
 
-                <div class="row mt-4" v-if="nextopen">
-                  <div class="col-md-6">
-                    <button type="submit" class="btn btn-info" @click.prevent="nextBack">
-                      Back
-                    </button>
-                  </div>
-                  <div class="col-md-6">
-                    <button type="submit" class="btn btn-info btn-fill float-right" @click.prevent="saveProfile">
-                      Save
+                <div class="row mt-4">
+                  <div class="col-md-12">
+                    <button type="submit" class="btn btn-info btn-fill float-right" @click.prevent="saveProperty">
+                      Save & Continuous
                     </button>
                   </div>
                 </div>
@@ -181,6 +230,10 @@
 }
 </style>
 <script>
+import {
+      required,
+      email,
+  } from "vuelidate/lib/validators";
 import Card from 'src/components/Cards/Card.vue'
 import AmenitiesImage from 'src/components/AmenitiesImage.vue'
 import BaseCheckbox from '../../components/Inputs/BaseCheckbox.vue'
@@ -197,7 +250,9 @@ import BaseRadio from '../../components/Inputs/BaseRadio.vue'
     },
     data () {
       return {
-        nextopen:false,
+        showFrontGarden: false,
+        showBackGarden: false,
+        isSubmitted:false,
         user: {
           propertyName: '',
           address: '',
@@ -205,15 +260,29 @@ import BaseRadio from '../../components/Inputs/BaseRadio.vue'
           state: '',
           postalCode: '',
           property_images:[],
-          room_images:[],
-          bed_room:5,
-          living_room:'',
-          kitchen:'',
-          bathroom: '',
+          bed_room:0,
+          living_room:0,
+          kitchen:0,
+          bathroom: 0,
           front_garden:0,
           back_garden:0,
-          room_name:'',
+          room_name:0,
         }
+      }
+    },
+    validations: {
+      user: {
+        propertyName:{required},
+        address: {required},
+        city:{required},
+        state:{required},
+        bed_room:{required},
+        living_room:{required},
+        kitchen:{required},
+        bathroom:{required},
+        front_garden:{required},
+        back_garden:{required},
+        postalCode:{required},
       }
     },
     methods: {
@@ -231,14 +300,31 @@ import BaseRadio from '../../components/Inputs/BaseRadio.vue'
     editImage (formData, index, fileList) {
       console.log('edit data', formData, index, fileList)
     },
-    nextOpen() {
-      this.nextopen=true;
+    showImageBox(){
+      if(this.user.front_garden){
+        this.showFrontGarden = true
+      }else{
+        this.showFrontGarden = false
+      }
     },
-    nextBack() {
-      this.nextopen=false;
+    showImageBoxBack(){
+      if(this.user.back_garden){
+        this.showBackGarden = true
+      }else{
+        this.showBackGarden = false
+      }
     },
-    saveProfile () {
+    saveProperty () {
+      this.isSubmitted = true;
+      this.$v.$touch();
+      if (this.$v.$invalid) {
+        alert('ffff')
+          return;
+      }
         alert('Your data: ' + JSON.stringify(this.user))
+        localStorage.setItem('property', JSON.stringify(this.user))
+        this.$router.push({name: 'AddNewRoom',  params: { id: 1 }});
+
       }
     }
   }

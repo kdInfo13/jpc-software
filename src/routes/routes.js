@@ -2,6 +2,9 @@ import DashboardLayout from '../layout/DashboardLayout.vue'
 // GeneralViews
 import NotFound from '../pages/NotFoundPage.vue'
 
+//Login page
+import Login from 'src/components/Login.vue'
+
 // Admin pages
 import Overview from 'src/pages/Overview.vue'
 import UserProfile from 'src/pages/UserProfile.vue'
@@ -20,6 +23,8 @@ import Property from 'src/pages/Property/TableList'
 import AddPropertyForm from 'src/pages/Property/AddPropertyForm'
 import EditPropertyForm from 'src/pages/Property/EditPropertyForm'
 
+import AddNewRoom from 'src/pages/Property/AddRoomForm'
+
 import Tenants from 'src/pages/Tenants/TableList'
 import AddTenantsForm from 'src/pages/Tenants/AddTenantsForm'
 import EditTenantsForm from 'src/pages/Tenants/EditTenantsForm'
@@ -28,16 +33,33 @@ import Trade from 'src/pages/TradePerson/TableList'
 import AddTradeForm from 'src/pages/TradePerson/AddTenantsForm'
 import EditTradeForm from 'src/pages/TradePerson/EditTenantsForm'
 
+import Expense from 'src/pages/PropertyExpense/TableList'
+import AddExpenseForm from 'src/pages/PropertyExpense/AddExpenseForm'
+import EditExpenseForm from 'src/pages/PropertyExpense/EditExpenseForm'
+
+
 const routes = [
+  {
+    path: '/login',
+    component: Login,
+    name: 'Login'
+  },
   {
     path: '/',
     component: DashboardLayout,
-    redirect: '/admin/overview'
+    redirect: '/admin/overview',
+    name:'dashboard',
+    meta: {
+      requiresAuth: true,
+    },
   },
   {
     path: '/admin',
     component: DashboardLayout,
     redirect: '/admin/overview',
+    meta: {
+      requiresAuth: true,
+    },
     children: [
       {
         path: 'overview',
@@ -106,6 +128,27 @@ const routes = [
         path: 'edit-property/:id',
         name: 'Edit Property',
         component: EditPropertyForm
+      },
+      {
+        path: 'add-amenities/:id',
+        name: 'AddNewRoom',
+        component: AddNewRoom
+      },
+
+      {
+        path: 'property-expense',
+        name: 'PropertyExpense',
+        component: Expense
+      },
+      {
+        path: 'new-property-expense',
+        name: 'AddExpense',
+        component: AddExpenseForm
+      },
+      {
+        path: 'edit-property-expense/:id',
+        name: 'EditExpense',
+        component: EditExpenseForm
       },
 
       {

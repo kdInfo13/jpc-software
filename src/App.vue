@@ -9,6 +9,9 @@
   export default {}
 </script>
 <style lang="scss">
+ .invalid-feedback{
+      display: block !important;
+    }
   .vue-notifyjs.notifications{
     .list-move {
       transition: transform 0.3s, opacity 0.4s;
@@ -33,6 +36,9 @@
     .list-leave-to {
       opacity: 0;
       transform: scale(1.2, 0.7);
+    }
+    .invalid-feedback{
+      display: block !important;
     }
   }
 </style>

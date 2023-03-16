@@ -26,11 +26,11 @@
         <i class="nc-icon nc-istanbul"></i>
         <p>Property list</p>
       </sidebar-link>
-     <!-- <sidebar-link to="/admin/typography">
+      <sidebar-link to="/admin/property-expense">
         <i class="nc-icon nc-paper-2"></i>
-        <p>Typography</p>
+        <p>Property Expense</p>
       </sidebar-link>
-      <sidebar-link to="/admin/icons">
+      <!--   <sidebar-link to="/admin/icons">
         <i class="nc-icon nc-atom"></i>
         <p>Icons</p>
       </sidebar-link>
@@ -42,10 +42,6 @@
         <i class="nc-icon nc-bell-55"></i>
         <p>Notifications</p>
       </sidebar-link> -->
-      <sidebar-link to="/admin/notifications">
-        <i class="nc-icon nc-bell-55"></i>
-        <p>LogOut</p>
-      </sidebar-link>
     </side-bar>
     <div class="main-panel">
       <top-navbar></top-navbar>

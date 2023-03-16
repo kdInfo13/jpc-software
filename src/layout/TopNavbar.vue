@@ -15,10 +15,10 @@
       <div class="collapse navbar-collapse justify-content-end">
         <ul class="navbar-nav ml-auto">
           <li class="nav-item">
-            <router-link to="/admin/user">Account</router-link>
+            <router-link to="/admin/user" class="btn btn-success btn-fill">Account</router-link>
           </li>
           <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="javascript:void(0)" class="nav-link btn" @click.prevent="logout">
               Log out
             </a>
           </li>
@@ -55,6 +55,10 @@
       },
       hideSidebar () {
         this.$sidebar.displaySidebar(false)
+      },
+      logout(){
+        localStorage.removeItem('LoggedUser');
+        this.$router.push({name: 'Login'});
       }
     }
   }

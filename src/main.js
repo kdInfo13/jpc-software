@@ -23,13 +23,24 @@ import LightBootstrap from "./light-bootstrap-main";
 // router setup
 import routes from "./routes/routes";
 
+import Vuelidate from 'vuelidate'
+
 import "./registerServiceWorker";
 // plugin setup
 Vue.use(VueRouter);
 Vue.use(LightBootstrap);
+Vue.use(Vuelidate)
 
+function isAuthenticated(){
+  if(localStorage.getItem('LoggedUser')){
+    return true;
+  }else{
+    return false;
+  }
+}
 // configure router
 const router = new VueRouter({
+  mode: 'history',
   routes, // short for routes: routes
   linkActiveClass: "nav-item active",
   scrollBehavior: (to) => {
@@ -40,7 +51,18 @@ const router = new VueRouter({
     }
   },
 });
+router.beforeEach((to, from, next) => {
 
+  if (to.matched.some((record) => record.meta.requiresAuth)) {
+    if (isAuthenticated()) {
+      next()
+    } else {
+      next('/login')
+    }
+  } else {
+    next()
+  }
+})
 /* eslint-disable no-new */
 new Vue({
   el: "#app",

@@ -1,24 +1,12 @@
-/*!
-
- =========================================================
- * Vue Light Bootstrap Dashboard - v2.1.0 (Bootstrap 4)
- =========================================================
-
- * Product Page: http://www.creative-tim.com/product/light-bootstrap-dashboard
- * Copyright 2023 Creative Tim (http://www.creative-tim.com)
- * Licensed under MIT (https://github.com/creativetimofficial/light-bootstrap-dashboard/blob/master/LICENSE.md)
-
- =========================================================
-
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
- */
 import Vue from "vue";
 import VueRouter from "vue-router";
 import App from "./App.vue";
 
 // LightBootstrap plugin
 import LightBootstrap from "./light-bootstrap-main";
+import moment from 'moment';
+import store from './store';
+import Tabs from 'vue-tabs-component';
 
 // router setup
 import routes from "./routes/routes";
@@ -30,9 +18,16 @@ import "./registerServiceWorker";
 Vue.use(VueRouter);
 Vue.use(LightBootstrap);
 Vue.use(Vuelidate)
+Vue.use(Tabs)
+
+Vue.filter('formatDate', function(value) {
+  if (value) {
+      return moment(String(value)).format('MM/DD/YYYY')
+  }
+});
 
 function isAuthenticated(){
-  if(localStorage.getItem('LoggedUser')){
+  if(localStorage.getItem('token')){
     return true;
   }else{
     return false;
@@ -51,20 +46,25 @@ const router = new VueRouter({
     }
   },
 });
-router.beforeEach((to, from, next) => {
 
-  if (to.matched.some((record) => record.meta.requiresAuth)) {
-    if (isAuthenticated()) {
-      next()
-    } else {
-      next('/login')
-    }
+router.beforeEach((to, from, next) => {
+  var requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+  if (to.path != '/login' && !isAuthenticated()) {
+    next({
+      name: 'Login'
+    });
+  } else if (to.path == '/login' && isAuthenticated()) {
+    next({
+      name: 'Admin'
+    });
   } else {
-    next()
+    next();
   }
-})
+});
+
 /* eslint-disable no-new */
 new Vue({
+  store,
   el: "#app",
   render: (h) => h(App),
   router,

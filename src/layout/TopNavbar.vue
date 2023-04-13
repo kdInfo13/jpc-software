@@ -57,7 +57,8 @@
         this.$sidebar.displaySidebar(false)
       },
       logout(){
-        localStorage.removeItem('LoggedUser');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
         this.$router.push({name: 'Login'});
       }
     }

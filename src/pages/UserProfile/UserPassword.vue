@@ -1,44 +1,35 @@
 <template>
   <card>
-    <h4 slot="header" class="card-title">Edit Profile</h4>
+    <h4 slot="header" class="card-title">Update password</h4>
     <form>
       <div class="row">
-        <div class="col-md-6">
-          <base-input type="text"
-                    label="Full Name"
-                    placeholder="Full Name"
-                    v-model="user.name">
+        <div class="col-md-12">
+          <base-input type="password"
+                    label="Old password"
+                    placeholder="Old password"
+                    v-model="user.oldPassword">
           </base-input>
-          <div v-if="isSubmitted && $v.user.name.$error" class="invalid-feedback">
-                    <span v-if="!$v.user.name.required">Name field is required.</span>
+          <div v-if="isSubmitted && $v.user.oldPassword.$error" class="invalid-feedback">
+                    <span v-if="!$v.user.oldPassword.required">Old password filed is required.</span>
                   </div>
         </div>
-        <div class="col-md-6">
-          <base-input type="email"
-                    label="Email"
-                    placeholder="Email"
-                    v-model="user.email">
-          </base-input>
-          <div v-if="isSubmitted && $v.user.email.$error" class="invalid-feedback">
-                    <span v-if="!$v.user.email.required">Email field is required.</span>
-                    <span v-if="!$v.user.email.email">Please provide valid email</span>
 
+        <div class="col-md-12">
+          <base-input type="password"
+                    label="New password"
+                    placeholder="New password"
+                    v-model="user.newPassword">
+          </base-input>
+          <div v-if="isSubmitted && $v.user.newPassword.$error" class="invalid-feedback">
+                    <span v-if="!$v.user.newPassword.required">New password filed is required.</span>
                   </div>
         </div>
+
       </div>
 
-      <div class="row">
-        <div class="col-md-6">
-          <base-input type="tel"
-                    label="Phone Number"
-                    placeholder="Phone Number"
-                    v-model="user.phone_no">
-          </base-input>
-        </div>
-      </div>
       <div class="text-center">
         <button type="submit" class="btn btn-info btn-fill float-right" @click.prevent="updateProfile">
-          Update Profile
+          Update Password
         </button>
       </div>
       <div class="clearfix"></div>
@@ -49,8 +40,7 @@
   import Card from 'src/components/Cards/Card.vue'
   import axios from "axios";
   import {
-        required,
-        email,
+        required
     } from "vuelidate/lib/validators";
   export default {
     components: {
@@ -59,25 +49,25 @@
     data () {
       return {
         isSubmitted:false,
-        currentUser:'',
         user: {
-          name: '',
-          phone_no: '',
-          email: '',
+          name:'',
+          email:'',
+          phone_no:'',
+          oldPassword: '',
+          newPassword: '',
         }
+      }
+    },validations: {
+      user: {
+        oldPassword:{required},
+        newPassword:{required},
       }
     },
     mounted(){
-      this.currentUser = JSON.parse(localStorage.getItem('user'))
-      this.user.name = this.currentUser.name
-      this.user.email = this.currentUser.email
-      this.user.phone_no = this.currentUser.phone_no
-    },
-    validations: {
-      user: {
-        name:{required},
-        email:{required, email},
-      }
+      const currentUser = JSON.parse(localStorage.getItem('user'));
+      this.user.name = currentUser.name
+      this.user.email = currentUser.email
+      this.user.phone_no = currentUser.phone_no
     },
     methods: {
       updateProfile () {
@@ -96,12 +86,7 @@
           .then(response => {
             this.loading=false;
             this.isSubmitted=false;
-            if(response.data){
-              this.currentUser.phone_no = this.user.phone_no
-              this.currentUser.name = this.user.name
-              this.currentUser.email = this.user.email
-
-              localStorage.setItem('user', JSON.stringify(this.currentUser))
+            if(response.data){         
               this.$notifications.notify(
               {
                 message: '<span>User updated successfully</span>',

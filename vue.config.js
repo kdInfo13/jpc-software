@@ -1,5 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
+process.env.VUE_APP_VERSION = require('./package.json').version
 
 function resolveSrc(_path) {
   return path.join(__dirname, _path);

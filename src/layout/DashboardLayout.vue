@@ -6,10 +6,14 @@
         <i class="nc-icon nc-chart-pie-35"></i>
         <p>Dashboard</p>
       </sidebar-link>
-      <!-- <sidebar-link to="/admin/user">
+      <sidebar-link to="/admin/user-list" v-if="currentUser.role_id==1">
         <i class="nc-icon nc-circle-09"></i>
-        <p>User Profile</p>
-      </sidebar-link> -->
+        <p>Admin / Manager</p>
+      </sidebar-link>
+      <sidebar-link to="/admin/user-list" v-if="currentUser.role_id==2">
+        <i class="nc-icon nc-circle-09"></i>
+        <p>Manager</p>
+      </sidebar-link>
       <sidebar-link to="/admin/owner-list">
         <i class="nc-icon nc-circle-09"></i>
         <p>Owner / Investors</p>
@@ -30,6 +34,7 @@
         <i class="nc-icon nc-paper-2"></i>
         <p>Property Expense</p>
       </sidebar-link>
+   
       <!--   <sidebar-link to="/admin/icons">
         <i class="nc-icon nc-atom"></i>
         <p>Icons</p>
@@ -68,6 +73,14 @@
       ContentFooter,
       DashboardContent,
       MobileMenu
+    },
+    data () {
+      return {
+        currentUser : '',
+      }
+    },
+    mounted(){
+      this.currentUser = JSON.parse(localStorage.getItem('user'))
     },
     methods: {
       toggleSidebar () {

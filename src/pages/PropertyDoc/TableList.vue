@@ -5,8 +5,10 @@
         <div class="col-12">
           <card class="card-plain">
           <div class="row">
-            <div class="col-6"><h4 class="card-title">Trader List</h4></div>
-            <div class="col-6"><router-link class="d-flex justify-content-end" to="/admin/new-trade">Add New</router-link></div>
+            <div class="col-6"><h4 class="card-title">Property Document List</h4></div>
+            <div class="col-6">
+              <router-link class="d-flex justify-content-end" :to="{ path: '/admin/add-doc/'+ id}">Add New</router-link>
+            </div>
           </div>
             <div class="table-responsive">
               <table class="table">
@@ -14,9 +16,11 @@
                     <slot name="columns">
                       <tr>
                         <th>ID</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
+                        <th>Type</th>
+                        <th>Care Taker Name</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Path</th>
                         <th>Action</th>
                       </tr>
                     </slot>
@@ -25,17 +29,22 @@
                   <tr v-for="(item, index) in tableData" :key="index">
                     <slot :row="item">
                       <td>{{item.id}}</td>
-                      <td>{{item.name}}</td>
-                      <td>{{item.email}}</td>
-                      <td>{{item.phone_no}}</td>
+                      <td>{{ item.type }}</td>
+                      <td>{{item.care_taker_name}}</td>
+                      <td>{{item.start_date}}</td>
+                      <td>{{item.end_date}}</td>
+                      <td><img :src='item.name'></td>
                       <td>
-                        <router-link class="btn btn-info p-2" :to="{ path: '/admin/edit-trade/'+ item.id}">Edit</router-link>
-                        <button type="submit" class="btn btn-danger p-1 ml-2" v-on:click="deleteProfile(item.id, index)">
+                        <router-link class="btn btn-info p-2 ml-2" :to="{ path: '/admin/edit-doc/'+ item.id}">Edit</router-link>
+                        <button type="submit" class="btn btn-danger p-1 ml-2" v-on:click="deleteDoc(item.id, index)">
                           Delete
                         </button>
                         
                       </td>
                     </slot>
+                  </tr>
+                  <tr v-if="this.tableData.length == 0">
+                    <td>No data found</td>
                   </tr>
                   </tbody>
                 </table>
@@ -48,11 +57,10 @@
   </div>
 </template>
 <script>
+  import axios from "axios";
   import LTable from 'src/components/Table.vue'
   import Card from 'src/components/Cards/Card.vue'
   import AjaxLoader from '../../AjaxLoader.vue';
-  import axios from "axios";
-
   export default {
     components: {
       LTable,
@@ -62,24 +70,26 @@
     data () {
       return {
         tableData : [],
+        id: '',
         loading: false
       }
     },
     mounted (){
-        this._getTraders()
+      this.id = this.$route.params.id
+      this._getProperties(this.$route.params.id);
     },
     methods: {
-      _getTraders(){
-        this.loading=true;
-            axios.get(process.env.VUE_APP_API_URL+'trade-persons-list',{
+      _getProperties(id){
+            this.loading=true;
+            axios.get(process.env.VUE_APP_API_URL+'document-list/'+id,{
               headers: {
                   'Content-Type': 'application/json',
                   'Authorization' : 'Bearer '+ localStorage.getItem('token')
               }
             })
             .then(response => {
-                if(response.status==200 && response.data.tradePersons){
-                  this.tableData = response.data.tradePersons
+                if(response.status==200 && response.data.documentList){
+                  this.tableData = response.data.documentList
                 }
                 this.loading=false;
             })
@@ -97,9 +107,9 @@
                 this.loading = false
             })
       },
-      deleteProfile (id, index) {
+      deleteDoc (id, index) {
         if(confirm("Do you really want to delete?")){
-          axios.delete(process.env.VUE_APP_API_URL+'trade-person/'+id, {
+          axios.delete(process.env.VUE_APP_API_URL+'document/'+id, {
           headers: {
                 'Content-Type': 'application/json',
                 'Authorization' : 'Bearer '+ localStorage.getItem('token')
@@ -127,7 +137,7 @@
                 })
             })
         }
-      },
+      }
     }
   }
 </script>

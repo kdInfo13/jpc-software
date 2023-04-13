@@ -30,19 +30,29 @@ import AddTenantsForm from 'src/pages/Tenants/AddTenantsForm'
 import EditTenantsForm from 'src/pages/Tenants/EditTenantsForm'
 
 import Trade from 'src/pages/TradePerson/TableList'
-import AddTradeForm from 'src/pages/TradePerson/AddTenantsForm'
-import EditTradeForm from 'src/pages/TradePerson/EditTenantsForm'
+import AddTradeForm from 'src/pages/TradePerson/AddTradeForm'
+import EditTradeForm from 'src/pages/TradePerson/EditTradeForm'
 
 import Expense from 'src/pages/PropertyExpense/TableList'
 import AddExpenseForm from 'src/pages/PropertyExpense/AddExpenseForm'
 import EditExpenseForm from 'src/pages/PropertyExpense/EditExpenseForm'
 
+import User from 'src/pages/User/TableList'
+import AddUserForm from 'src/pages/User/AddUserForm'
+import EditUserForm from 'src/pages/User/EditUserForm'
+
+import ListDoc from 'src/pages/PropertyDoc/TableList'
+import AddNewDoc from 'src/pages/PropertyDoc/AddDocForm'
+import EditNewDoc from 'src/pages/PropertyDoc/EditDocForm'
 
 const routes = [
   {
     path: '/login',
     component: Login,
-    name: 'Login'
+    name: 'Login',
+    meta: {
+      requiresAuth: true,
+    },
   },
   {
     path: '/',
@@ -68,7 +78,7 @@ const routes = [
       },
       {
         path: 'owner-list',
-        name: 'Owner List',
+        name: 'OwnerList',
         component: Owner
       },
       {
@@ -84,7 +94,7 @@ const routes = [
 
       {
         path: 'tenants-list',
-        name: 'Tenants List',
+        name: 'TenantsList',
         component: Tenants
       },
       {
@@ -100,7 +110,7 @@ const routes = [
 
       {
         path: 'trades-list',
-        name: 'Trades List',
+        name: 'TradesList',
         component: Trade
       },
       {
@@ -116,7 +126,7 @@ const routes = [
 
       {
         path: 'property-list',
-        name: 'Property List',
+        name: 'PropertyList',
         component: Property
       },
       {
@@ -134,14 +144,28 @@ const routes = [
         name: 'AddNewRoom',
         component: AddNewRoom
       },
-
       {
-        path: 'property-expense',
+        path: 'doc-list/:id',
+        name: 'ListDoc',
+        component: ListDoc
+      },
+      {
+        path: 'add-doc/:id',
+        name: 'AddNewDoc',
+        component: AddNewDoc
+      },
+      {
+        path: 'edit-doc/:id',
+        name: 'EditDoc',
+        component: EditNewDoc
+      },
+      {
+        path: 'property-expense/',
         name: 'PropertyExpense',
         component: Expense
       },
       {
-        path: 'new-property-expense',
+        path: 'new-property-expense/:id?',
         name: 'AddExpense',
         component: AddExpenseForm
       },
@@ -152,14 +176,24 @@ const routes = [
       },
 
       {
-        path: 'user',
+        path: 'user-list',
         name: 'User',
-        component: UserProfile
+        component: User
       },
       {
-        path: 'table-list',
-        name: 'Table List',
-        component: TableList
+        path: 'add-user',
+        name: 'addUser',
+        component: AddUserForm
+      },
+      {
+        path: 'edit-user/:id',
+        name: 'editUser',
+        component: EditUserForm
+      },
+      {
+        path: 'user',
+        name: 'user',
+        component: UserProfile
       },
       {
         path: 'typography',
@@ -190,14 +224,5 @@ const routes = [
   },
   { path: '*', component: NotFound }
 ]
-
-/**
- * Asynchronously load view (Webpack Lazy loading compatible)
- * The specified component must be inside the Views folder
- * @param  {string} name  the filename (basename) of the view to load.
-function view(name) {
-   var res= require('../components/Dashboard/Views/' + name + '.vue');
-   return res;
-};**/
 
 export default routes

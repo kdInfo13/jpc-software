@@ -32,26 +32,46 @@
               <button type="submit" class="btn btn-success btn-fill" @click.prevent="loginAction">Login</button>
             </div>
         </form>
+        <ajax-loader v-if="loading"></ajax-loader>
       </div>
     </div>
   </div>
+
 </template>
 <script>
+import Tes from './Tes.vue'
+import axios from "axios";
+import AjaxLoader from '../AjaxLoader.vue';
   import {
         required,
         email,
     } from "vuelidate/lib/validators";
 import BaseInput from './Inputs/BaseInput.vue'
   export default {
-    components: { BaseInput },
+    components: { BaseInput, AjaxLoader,Tes },
     name: 'login',
     data () {
       return{
+        menu_config: [
+        {
+          title: "Home",
+        },
+        {
+          title: "Services",
+          subItems: ["Cooking", "Cleaning"]
+        },
+        {
+          title: "Contact",
+          subItems: ["Email", "Address"]
+        }
+        ],
         form: {
           password: '',
           email: ''
         },
-        isSubmitted: false
+        isSubmitted: false,
+        loading: false
+
       }
     },
     validations: {
@@ -67,12 +87,47 @@ import BaseInput from './Inputs/BaseInput.vue'
         if (this.$v.$invalid) {
             return;
         }
-
-        localStorage.setItem('LoggedUser', 'web_token')
-        // self.$router.push('/admin/overview');
-        this.$router.push({name: 'dashboard'});
-
-
+        this.loading=true;
+        axios.post(process.env.VUE_APP_API_URL+'login', this.form, {
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            })
+            .then(response => {
+              this.loading=false;
+              this.isSubmitted=false;
+              if(response.status == 200 && response.data.token){
+                localStorage.setItem('token', response.data.token)
+                localStorage.setItem('user', JSON.stringify(response.data.user))
+                axios.defaults.headers.common['Authorization'] = response.data.token
+                this.$router.push({name: 'dashboard'});
+              }else{
+                this.$notifications.notify(
+                {
+                  message: '<span>'+response.data.error_message+'</span>',
+                  icon: 'nc-icon nc-bell-55',
+                  horizontalAlign: 'right',
+                  verticalAlign: 'top',
+                  type: 'danger'
+                })
+              }
+           
+            })
+            .catch(error => {
+              this.$notifications.notify(
+              {
+                message: `<span>Something went wrong.</span>`,
+                icon: 'nc-icon nc-bell-55',
+                horizontalAlign: 'right',
+                verticalAlign: 'top',
+                type: 'danger'
+              })
+                this.isSubmitted=false;
+                this.loading=false;
+            }).finally( () => {
+                this.isSubmitted = false
+                this.loading=false;
+            })
       }
     }
   }

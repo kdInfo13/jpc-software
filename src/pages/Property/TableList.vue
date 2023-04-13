@@ -17,9 +17,7 @@
                       <tr>
                         <th>ID</th>
                         <th>Property Name</th>
-                        <th>Owner Name</th>
                         <th>Address</th>
-                        <th>No. Of Rooms</th>
                         <th>Action</th>
                       </tr>
                     </slot>
@@ -29,11 +27,12 @@
                     <slot :row="item">
                       <td>{{item.id}}</td>
                       <td>{{item.name}}</td>
-                      <td>{{item.owner_name}}</td>
-                      <td>{{item.address}}</td>
-                      <td>{{item.rooms}}</td>
+                      <td>{{item.door_no}} {{item.street}} {{item.area}} {{item.county}} {{item.postcode}} </td>
                       <td>
-                        <router-link class="btn btn-info p-2" :to="{ path: '/admin/edit-property/'+ item.id}">Edit</router-link>
+                        <router-link class="btn btn-info p-2" :to="{ path: '/admin/add-amenities/'+ item.id}">Rooms</router-link>
+                        <router-link class="btn btn-info p-2 ml-2" :to="{ path: '/admin/doc-list/'+ item.id}">Document</router-link>
+                        <router-link class="btn btn-info p-2 ml-2" :to="{ path: '/admin/new-property-expense/'+ item.id}">Expense</router-link>
+                        <router-link class="btn btn-info p-2 ml-2" :to="{ path: '/admin/edit-property/'+ item.id}">Edit</router-link>
                         <button type="submit" class="btn btn-danger p-1 ml-2" @click.prevent="deleteProfile">
                           Delete
                         </button>
@@ -51,6 +50,7 @@
   </div>
 </template>
 <script>
+  import axios from "axios";
   import LTable from 'src/components/Table.vue'
   import Card from 'src/components/Cards/Card.vue'
   export default {
@@ -60,16 +60,42 @@
     },
     data () {
       return {
-        tableData : [{
-          id: 1,
-          name: 'Dakota Rice',
-          owner_name: 'JPC',
-          rooms: '3',
-          address: 'Oud-Turnhout'
-        }]
+        tableData : [],
+        loading: false
       }
     },
+    mounted (){
+      this._getProperties();
+    },
     methods: {
+      _getProperties(){
+            this.loading=true;
+            axios.get(process.env.VUE_APP_API_URL+'properties',{
+              headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization' : 'Bearer '+ localStorage.getItem('token')
+              }
+            })
+            .then(response => {
+                if(response.status==200 && response.data.properties){
+                  this.tableData = response.data.properties
+                }
+                this.loading=false;
+            })
+            .catch(error => {
+              this.$notifications.notify(
+              {
+                message: `<span>Something went wrong.</span>`,
+                icon: 'nc-icon nc-bell-55',
+                horizontalAlign: 'right',
+                verticalAlign: 'top',
+                type: 'danger'
+              })
+                this.loading=false;
+            }).finally( () => {
+                this.loading = false
+            })
+      },
       deleteProfile () {
         alert('delete tenant')
       }

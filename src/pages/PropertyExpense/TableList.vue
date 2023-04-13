@@ -13,9 +13,8 @@
                   <thead>
                     <slot name="columns">
                       <tr>
-                        <th>ID</th>
+                        <th>S.no</th>
                         <th>Property Name</th>
-                        <th>Expense Type</th>
                         <th>Amount</th>
                         <th>Created Date</th>
                         <th>Action</th>
@@ -25,14 +24,13 @@
                   <tbody>
                   <tr v-for="(item, index) in tableData" :key="index">
                     <slot :row="item">
-                      <td>{{item.id}}</td>
-                      <td>{{item.name}}</td>
-                      <td>{{item.type}}</td>
+                      <td>{{index+1}}</td>
+                      <td>{{item.property.name}}</td>
                       <td>${{item.amount}}</td>
-                      <td>{{item.date}}</td>
+                      <td> {{ item.created_at | formatDate }}</td>
                       <td>
                         <router-link class="btn btn-info p-2" :to="{ path: '/admin/edit-property-expense/'+ item.id}">Edit</router-link>
-                        <button type="submit" class="btn btn-danger p-1 ml-2" @click.prevent="deleteProfile">
+                        <button type="submit" class="btn btn-danger p-1 ml-2" @click.prevent="deleteExpense(item.id, index)">
                           Delete
                         </button>
                         
@@ -41,6 +39,7 @@
                   </tr>
                   </tbody>
                 </table>
+                <ajax-loader v-if="loading"></ajax-loader>
             </div>
           </card>
         </div>
@@ -51,26 +50,84 @@
 <script>
   import LTable from 'src/components/Table.vue'
   import Card from 'src/components/Cards/Card.vue'
+  import axios from "axios";
+  import AjaxLoader from '../../AjaxLoader.vue';
+
   export default {
     components: {
       LTable,
-      Card
+      Card,
+      AjaxLoader
     },
     data () {
       return {
-        tableData : [{
-          id: 1,
-          name: 'Dakota Rice',
-          type: 'council tax',
-          date: '12-12-2023',
-          amount: '100'
-        }]
+        loading: false,
+        tableData : []
       }
     },
+    mounted(){
+      this._getExpense();
+    },
     methods: {
-      deleteProfile () {
-        alert('delete tenant')
-      }
+      _getExpense(){
+        this.loading=true;
+          axios.get(process.env.VUE_APP_API_URL+'expense-list',{
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization' : 'Bearer '+ localStorage.getItem('token')
+            }
+          })
+          .then(response => {
+              if(response.status==200 && response.data.expense){
+                this.tableData = response.data.expense
+              }
+              this.loading=false;
+          })
+          .catch(error => {
+            this.$notifications.notify(
+            {
+              message: `<span>Something went wrong.</span>`,
+              icon: 'nc-icon nc-bell-55',
+              horizontalAlign: 'right',
+              verticalAlign: 'top',
+              type: 'danger'
+            })
+              this.loading=false;
+          }).finally( () => {
+              this.loading = false
+          })
+      },
+      deleteExpense (id, index) {
+        if(confirm("Do you really want to delete?")){
+          axios.delete(process.env.VUE_APP_API_URL+'expense/'+id, {
+          headers: {
+                'Content-Type': 'application/json',
+                'Authorization' : 'Bearer '+ localStorage.getItem('token')
+            },
+          })
+            .then(resp => {
+              this.$notifications.notify(
+                {
+                  message: '<span>'+resp.data.message+'</span>',
+                  icon: 'nc-icon nc-bell-55',
+                  horizontalAlign: 'right',
+                  verticalAlign: 'top',
+                  type: 'success'
+                })
+                this.tableData.splice(index, 1);
+            })
+            .catch(error => {
+              this.$notifications.notify(
+                {
+                  message: '<span>'+error+'</span>',
+                  icon: 'nc-icon nc-bell-55',
+                  horizontalAlign: 'right',
+                  verticalAlign: 'top',
+                  type: 'danger'
+                })
+            })
+        }
+      },
     }
   }
 </script>

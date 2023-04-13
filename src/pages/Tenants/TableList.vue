@@ -16,7 +16,6 @@
                         <th>ID</th>
                         <th>Name</th>
                         <th>Propert Name</th>
-                        <th>Address</th>
                         <th>Rent Date</th>
                         <th>Rent Amount</th>
                         <th>Action</th>
@@ -27,14 +26,13 @@
                   <tr v-for="(item, index) in tableData" :key="index">
                     <slot :row="item">
                       <td>{{item.id}}</td>
-                      <td>{{item.name}}</td>
-                      <td>{{item.property}}</td>
-                      <td>{{item.address}}</td>
+                      <td>{{item.tanent.name}}</td>
+                      <td>{{item.property.name}}</td>
                       <td>{{item.rent_date}}</td>
                       <td>{{item.rent_amount}}</td>
                       <td>
                         <router-link class="btn btn-info p-2" :to="{ path: '/admin/edit-tenant/'+ item.id}">Edit</router-link>
-                        <button type="submit" class="btn btn-danger p-1 ml-2" @click.prevent="deleteProfile">
+                        <button type="submit" class="btn btn-danger p-1 ml-2"  v-on:click="deleteProfile(item.id, index)">
                           Delete
                         </button>
                         
@@ -53,6 +51,8 @@
 <script>
   import LTable from 'src/components/Table.vue'
   import Card from 'src/components/Cards/Card.vue'
+  import axios from "axios";
+
   export default {
     components: {
       LTable,
@@ -60,19 +60,71 @@
     },
     data () {
       return {
-        tableData : [{
-          id: 1,
-          name: 'Dakota Rice',
-          rent_date: '10-12-2023',
-          rent_amount: '30.99',
-          property: 'Niger',
-          address: 'Oud-Turnhout'
-        }]
+        tableData : []
       }
     },
+    mounted(){
+      this._getTenants();
+    },
     methods: {
-      deleteProfile () {
-        alert('delete tenant')
+      _getTenants(){
+          this.loading=true;
+          axios.get(process.env.VUE_APP_API_URL+'tanent-list',{
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization' : 'Bearer '+ localStorage.getItem('token')
+            }
+          })
+          .then(response => {
+              if(response.status==200 && response.data.tanents){
+                this.tableData = response.data.tanents
+              }
+              this.loading=false;
+          })
+          .catch(error => {
+            this.$notifications.notify(
+            {
+              message: `<span>Something went wrong.</span>`,
+              icon: 'nc-icon nc-bell-55',
+              horizontalAlign: 'right',
+              verticalAlign: 'top',
+              type: 'danger'
+            })
+              this.loading=false;
+          }).finally( () => {
+              this.loading = false
+          })
+      },
+      deleteProfile (id, index) {
+        if(confirm("Do you really want to delete?")){
+          axios.delete(process.env.VUE_APP_API_URL+'tanent/'+id, {
+          headers: {
+                'Content-Type': 'application/json',
+                'Authorization' : 'Bearer '+ localStorage.getItem('token')
+            },
+          })
+            .then(resp => {
+              this.$notifications.notify(
+                {
+                  message: '<span>'+resp.data.message+'</span>',
+                  icon: 'nc-icon nc-bell-55',
+                  horizontalAlign: 'right',
+                  verticalAlign: 'top',
+                  type: 'success'
+                })
+                this.tableData.splice(index, 1);
+            })
+            .catch(error => {
+              this.$notifications.notify(
+                {
+                  message: '<span>'+error+'</span>',
+                  icon: 'nc-icon nc-bell-55',
+                  horizontalAlign: 'right',
+                  verticalAlign: 'top',
+                  type: 'danger'
+                })
+            })
+        }
       }
     }
   }

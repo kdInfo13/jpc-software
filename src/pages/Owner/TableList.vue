@@ -13,12 +13,13 @@
                   <thead>
                     <slot name="columns">
                       <tr>
-                        <th>ID</th>
+                        <th>S.No</th>
                         <th>Name</th>
                         <th>Email</th>
                         <th>Phone</th>
                         <th>Type</th>
                         <th>Address</th>
+                        <th>Doc Link</th>
                         <th>Action</th>
                       </tr>
                     </slot>
@@ -26,23 +27,33 @@
                   <tbody>
                   <tr v-for="(item, index) in tableData" :key="index">
                     <slot :row="item">
-                      <td>{{item.id}}</td>
+                      <td>{{index+1}}</td>
                       <td>{{item.name}}</td>
                       <td>{{item.email}}</td>
-                      <td>{{item.phone}}</td>
-                      <td>{{item.type}}</td>
-                      <td>{{item.address}}</td>
+                      <td>{{item.phone_no}}</td>
+                      <td>
+                        <span v-if="item.typer_of_owner==1">Landlord</span>
+                        <span v-if="item.typer_of_owner==2">Investor</span>
+                      </td>
+                      <td>{{item.door_no}} {{item.street}} {{item.area}}, {{item.postcode}}</td>
+                      <td>
+                        <a v-if="item.id_proof" :href="imagePath+item.id_proof" target="_blank">Click Here</a>
+                        <span v-else>N/A</span>
+                      </td>
                       <td>
                         <router-link class="btn btn-info p-2" :to="{ path: '/admin/edit-owner/'+ item.id}">Edit</router-link>
-                        <button type="submit" class="btn btn-danger p-1 ml-2" @click.prevent="deleteProfile">
+                        <button type="submit" class="btn btn-danger p-1 ml-2" v-on:click="deleteProfile(item.id, index)">
                           Delete
                         </button>
-                        
                       </td>
                     </slot>
                   </tr>
+                  <tr v-if="tableData.length==0">
+                    <td v-if="!loading">No record found.</td>
+                  </tr>
                   </tbody>
                 </table>
+                <ajax-loader v-if="loading"></ajax-loader>
             </div>
           </card>
         </div>
@@ -51,38 +62,89 @@
   </div>
 </template>
 <script>
+  import axios from "axios";
   import LTable from 'src/components/Table.vue'
   import Card from 'src/components/Cards/Card.vue'
+  import AjaxLoader from '../../AjaxLoader.vue';
+
   export default {
     components: {
       LTable,
-      Card
+      Card,
+      AjaxLoader
     },
     data () {
       return {
-        tableData : [{
-          id: 1,
-          name: 'Dakota Rice',
-          email: 'owner@yopmail.com',
-          phone: '6354758697',
-          type: 'Owner',
-          address: 'Oud-Turnhout'
-        },
-        {
-          id: 2,
-          name: 'Dakota Rice',
-          email: 'investors@yopmail.com',
-          phone: '6354758697',
-          type: 'Investors',
-          address: 'Oud-Turnhout'
-        }]
+        imagePath:'',
+        tableData : [],
+        loading: false
       }
     },
+    mounted (){
+      this.imagePath = process.env.VUE_APP_IMAGE
+      this._getBusinesses()
+    },
     methods: {
-      deleteProfile () {
-        alert('delete tenant')
-      }
-    }
+      deleteProfile (id, index) {
+        if(confirm("Do you really want to delete?")){
+          axios.delete(process.env.VUE_APP_API_URL+'owner/'+id, {
+          headers: {
+                'Content-Type': 'application/json',
+                'Authorization' : 'Bearer '+ localStorage.getItem('token')
+            },
+          })
+            .then(resp => {
+              this.$notifications.notify(
+                {
+                  message: '<span>'+resp.data.message+'</span>',
+                  icon: 'nc-icon nc-bell-55',
+                  horizontalAlign: 'right',
+                  verticalAlign: 'top',
+                  type: 'success'
+                })
+                this.tableData.splice(index, 1);
+            })
+            .catch(error => {
+              this.$notifications.notify(
+                {
+                  message: '<span>'+error+'</span>',
+                  icon: 'nc-icon nc-bell-55',
+                  horizontalAlign: 'right',
+                  verticalAlign: 'top',
+                  type: 'danger'
+                })
+            })
+        }
+      },
+      _getBusinesses(){
+            this.loading=true;
+            axios.get(process.env.VUE_APP_API_URL+'owners',{
+              headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization' : 'Bearer '+ localStorage.getItem('token')
+              }
+            })
+            .then(response => {
+                if(response.status==200 && response.data.owners){
+                  this.tableData = response.data.owners
+                }
+                this.loading=false;
+            })
+            .catch(error => {
+              this.$notifications.notify(
+              {
+                message: `<span>Something went wrong.</span>`,
+                icon: 'nc-icon nc-bell-55',
+                horizontalAlign: 'right',
+                verticalAlign: 'top',
+                type: 'danger'
+              })
+                this.loading=false;
+            }).finally( () => {
+                this.loading = false
+            })
+      },
+    },
   }
 </script>
 <style>

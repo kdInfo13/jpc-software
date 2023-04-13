@@ -27,13 +27,11 @@
 </template>
 
 <script>
-import VueUploadMultipleImage from 'vue-upload-multiple-image'
 import BaseInput from './Inputs/BaseInput.vue';
 
 export default {
   name: "AmenitiesImage",
   components: {
-      VueUploadMultipleImage,
       BaseInput,
   },
   props: {

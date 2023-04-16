@@ -2,7 +2,7 @@
   <div class="content">
     <div class="container-fluid">
       <div class="row">
-        <div class="col-xl-3 col-md-6" v-if="currentUser.role_id==1">
+        <div class="col-xl-3 col-md-6" v-if="currentUser.role_id==1"  @click.prevent="directLink('User')">
           <stats-card>
             <div slot="header" class="icon-warning">
               <i class="nc-icon nc-circle-09 text-warning"></i>
@@ -16,7 +16,7 @@
           </stats-card>
         </div>
 
-        <div class="col-xl-3 col-md-6">
+        <div class="col-xl-3 col-md-6" @click.prevent="directLink('User')">
           <stats-card>
             <div slot="header" class="icon-success">
               <i class="nc-icon nc-circle-09 text-success"></i>
@@ -29,7 +29,7 @@
             </div>
           </stats-card>
         </div>
-        <div class="col-xl-3 col-md-6">
+        <div class="col-xl-3 col-md-6" @click.prevent="directLink('OwnerList')">
           <stats-card>
             <div slot="header" class="icon-danger">
               <i class="nc-icon nc-circle-09 text-warning"></i>
@@ -42,7 +42,7 @@
             </div>
           </stats-card>
         </div>
-        <div class="col-xl-3 col-md-6">
+        <div class="col-xl-3 col-md-6" @click.prevent="directLink('OwnerList')">
           <stats-card>
             <div slot="header" class="icon-danger">
               <i class="nc-icon nc-circle-09 text-warning"></i>
@@ -56,7 +56,7 @@
           </stats-card>
         </div>
 
-        <div class="col-xl-3 col-md-6">
+        <div class="col-xl-3 col-md-6" @click.prevent="directLink('TenantsList')">
           <stats-card>
             <div slot="header" class="icon-success">
               <i class="nc-icon nc-circle-09 text-info"></i>
@@ -70,7 +70,7 @@
           </stats-card>
         </div>
 
-        <div class="col-xl-3 col-md-6">
+        <div class="col-xl-3 col-md-6" @click.prevent="directLink('TradesList')">
           <stats-card>
             <div slot="header" class="icon-info">
               <i class="nc-icon nc-circle-09 text-sucess"></i>
@@ -84,7 +84,7 @@
           </stats-card>
         </div>
 
-        <div class="col-xl-3 col-md-6">
+        <div class="col-xl-3 col-md-6" @click.prevent="directLink('PropertyList')">
           <stats-card>
             <div slot="header" class="icon-danger">
               <i class="nc-icon nc-istanbul text-danger"></i>
@@ -183,6 +183,9 @@
       this._getDashboard();
     },
     methods:{
+      directLink(nameP){
+        this.$router.push({name: nameP});
+      },
       _getDashboard(){
         axios.get(process.env.VUE_APP_API_URL+'dashboard', {
           headers: {
@@ -210,5 +213,10 @@
   }
 </script>
 <style>
-
+.card.card-stats {
+    cursor: pointer;
+}
+.card.card-stats:hover {
+    background: #00000008;
+}
 </style>

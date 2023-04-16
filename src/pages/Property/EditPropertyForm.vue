@@ -2,6 +2,7 @@
   <div class="content">
     <div class="container-fluid">
       <div class="row">
+        <card>
         <div class="col-12">
             <h4 slot="header" class="card-title">Edit Property</h4>
             <form v-if="!loading">
@@ -262,6 +263,7 @@
             <ajax-loader v-if="loading"></ajax-loader>
 
         </div>
+      </card>
       </div>
     </div>
 </div>

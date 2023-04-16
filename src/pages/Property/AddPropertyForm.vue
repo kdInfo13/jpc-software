@@ -465,17 +465,8 @@ import AjaxLoader from '../../AjaxLoader.vue';
             })
             .then(response => {
                 if(response.status==200 && response.data.owners){
-                  const tmpOwner = [];
-                  const tmpInvestor = [];
-                  response.data.owners.map(function(value, key){
-                    if(value.typer_of_owner==1){
-                      tmpOwner.push(value)
-                    }else{
-                      tmpInvestor.push(value)
-                    }
-                  })
-                  this.ownerList = tmpOwner
-                  this.investorList = tmpInvestor
+                  this.ownerList = response.data.owners
+                  this.investorList = response.data.investor
                 }
                 this.loading=false;
             })

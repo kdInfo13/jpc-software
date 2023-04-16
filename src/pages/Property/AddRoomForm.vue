@@ -25,12 +25,12 @@
                             <label>Bed Room Images</label><br>
                             <div class="dropbox">
                               <input type="file" multiple :data-id="i" @change="onFileChange" class="input-file">
-                                <p v-if="!form.room_image[i]">
+                                <p v-if="!form.room_name_image[i]">
                                   Drag your file(s) here to begin<br> or click to browse
                                 </p>
                                 <div class="row">
-                                  <div class="col-md-6" v-for="(inx, ki) in  form.room_image[i]" :key="inx">
-                                    <img :src="imagePath+form.room_image[i][ki]">
+                                  <div class="col-md-4 square" v-for="(inx, ki) in  form.room_name_image[i]" :key="inx">
+                                    <img :src="imagePath+form.room_name_image[i][ki]">
                                   </div>
                                 </div>
                                
@@ -42,6 +42,7 @@
                     </div>
                     <hr>
                     <div class="mx-auto col-md-12">
+                      <ajax-loader v-if="loadingLiving"></ajax-loader>
                       <h5>No. Living Rooms</h5>
                         <div class="row" v-for="(index,i) in propertyDetails.no_of_living_areas" :key="index">
                           <div class="col-md-6">
@@ -56,12 +57,12 @@
                             <label>Living Room Images</label><br>
                             <div class="dropbox">
                               <input type="file" multiple :data-id="i" @change="onFileChangeLiving" class="input-file">
-                                <p v-if="!form.living_image[i]">
+                                <p v-if="!form.living_name_image[i]">
                                   Drag your file(s) here to begin<br> or click to browse
                                 </p>
                                 <div class="row">
-                                  <div class="col-md-6" v-for="(inx, ki) in  form.living_image[i]" :key="inx">
-                                    <img :src="imagePath+form.living_image[i][ki]">
+                                  <div class="col-md-4 square" v-for="(inx, ki) in  form.living_name_image[i]" :key="inx">
+                                    <img :src="imagePath+form.living_name_image[i][ki]">
                                   </div>
                                 </div>
                             </div>
@@ -71,6 +72,7 @@
 
                     <hr>
                     <div class="mx-auto col-md-12">
+                      <ajax-loader v-if="loadingKitchen"></ajax-loader>
                       <h5>No. Kitchen</h5>
                         <div class="row" v-for="(index,k) in propertyDetails.no_of_kitchens" :key="index">
                           <div class="col-md-6">
@@ -85,12 +87,12 @@
                             <label>Kitchen  Images</label><br>
                             <div class="dropbox">
                               <input type="file" multiple :data-id="k" @change="onFileChangeKitchen" class="input-file">
-                                <p v-if="!form.kitchen_image[k]">
+                                <p v-if="!form.kitchen_name_image[k]">
                                   Drag your file(s) here to begin<br> or click to browse
                                 </p>
                                 <div class="row">
-                                  <div class="col-md-6" v-for="(inx, ki) in  form.kitchen_image[k]" :key="inx">
-                                    <img :src="imagePath+form.kitchen_image[k][ki]">
+                                  <div class="col-md-4 square" v-for="(inx, ki) in  form.kitchen_name_image[k]" :key="inx">
+                                    <img :src="imagePath+form.kitchen_name_image[k][ki]">
                                   </div>
                                 </div>
                             </div>
@@ -100,6 +102,7 @@
 
                     <hr>
                     <div class="mx-auto col-md-12">
+                      <ajax-loader v-if="loadingBathroom"></ajax-loader>
                       <h5>No. Bathroom</h5>
                         <div class="row" v-for="(index,b) in propertyDetails.no_of_bathrooms" :key="index">
                           <div class="col-md-6">
@@ -115,12 +118,12 @@
                             <label>Bathroom Images</label><br>
                             <div class="dropbox">
                               <input type="file" multiple :data-id="b" @change="onFileChangeBath" class="input-file">
-                                <p v-if="!form.bathroom_image[b]">
+                                <p v-if="!form.bathroom_name_image[b]">
                                   Drag your file(s) here to begin<br> or click to browse
                                 </p>
                                 <div class="row">
-                                  <div class="col-md-6" v-for="(inx, ki) in  form.bathroom_image[b]" :key="inx">
-                                    <img :src="imagePath+form.bathroom_image[b][ki]">
+                                  <div class="col-md-4 square" v-for="(inx, ki) in  form.bathroom_name_image[b]" :key="inx">
+                                    <img :src="imagePath+form.bathroom_name_image[b][ki]">
                                   </div>
                                 </div>                            </div>
                           </div>
@@ -135,7 +138,11 @@
                             <p v-if="!form.front_image">
                               Drag your file(s) here to begin<br> or click to browse
                             </p>
-                            <img v-if="form.front_image" :src="imagePath+form.front_image">
+                            <div class="row">
+                              <div class="col-md-4 square" v-for="(inx, ki) in  form.front_image" :key="inx">
+                                <img :src="imagePath+form.front_image[ki]">
+                              </div>
+                            </div> 
                         </div>
                         <ajax-loader v-if="loadingFront"></ajax-loader>
                     </div>
@@ -146,7 +153,11 @@
                             <p v-if="!form.rear_image">
                               Drag your file(s) here to begin<br> or click to browse
                             </p>
-                            <img v-if="form.rear_image" :src="imagePath+form.rear_image">
+                            <div class="row">
+                              <div class="col-md-4 square" v-for="(inx, ki) in  form.rear_image" :key="inx">
+                                <img :src="imagePath+form.rear_image[ki]">
+                              </div>
+                            </div> 
                         </div>
                         <ajax-loader v-if="loadingRear"></ajax-loader>
                     </div>
@@ -198,6 +209,9 @@ import AjaxLoader from '../../AjaxLoader.vue';
         loadingFront:false,
         loadingRear:false,
         loadingRoom:false,
+        loadingLiving:false,
+        loadingKitchen:false,
+        loadingBathroom:false,
         isInitial:false,
         imagePath:'',
         fileName: [],
@@ -214,15 +228,15 @@ import AjaxLoader from '../../AjaxLoader.vue';
         rear_url:[],
         form: {
           room_name:[],
-          room_image:[],
+          room_name_image:[],
           living_name:[],
-          living_image:[],
+          living_name_image:[],
           kitchen_name:[],
-          kitchen_image:[],
+          kitchen_name_image:[],
           bathroom_name:[],
-          bathroom_image:[],
-          front_image:'',
-          rear_image:''
+          bathroom_name_image:[],
+          front_image:[],
+          rear_image:[]
         }
       }
     },
@@ -251,21 +265,24 @@ import AjaxLoader from '../../AjaxLoader.vue';
         
           formData.append('path', 'room');
           formData.append('key', 'id_proof');
-          if(currentObj.form.room_image[index]){
+          if(currentObj.form.room_name_image[index]){
             currentObj.url = []
-            currentObj.url.push(currentObj.form.room_image[index])
+            for(let i=0; i < currentObj.form.room_name_image[index].length; i++){
+              currentObj.url.push(currentObj.form.room_name_image[index][i])
+            }
           }else{
             currentObj.url = []
           }
           
           this.loadingRoom=true;
           const tmpArr = [];
-          axios.post(process.env.VUE_APP_API_URL+'upload_image', formData, config)
+          axios.post(process.env.VUE_APP_API_URL+'upload_multiple_image', formData, config)
           .then(function (response) {
               if(response.data.status){
-                currentObj.isInitial = true;
-                currentObj.url.push(response.data.url)
-                currentObj.form.room_image[index] = currentObj.url
+                for(let i=0; i < response.data.url.length; i++){
+                  currentObj.url.push(response.data.url[i])
+                }
+                currentObj.form.room_name_image[index] = currentObj.url
               }
           })
         .catch(error => {
@@ -297,22 +314,27 @@ import AjaxLoader from '../../AjaxLoader.vue';
           }
           formData.append('path', 'living');
           formData.append('key', 'id_proof');
-          if(currentObj.form.living_image[index]){
+          if(currentObj.form.living_name_image[index]){
             currentObj.l_url = []
-            currentObj.l_url.push(currentObj.form.living_image[index])
+            for(let i=0; i < currentObj.form.living_name_image[index].length; i++){
+              currentObj.l_url.push(currentObj.form.living_name_image[index][i])
+            }
           }else{
             currentObj.l_url = []
           }
-          this.loading=true;
-          axios.post(process.env.VUE_APP_API_URL+'upload_image', formData, config)
+          this.loadingLiving=true;
+          axios.post(process.env.VUE_APP_API_URL+'upload_multiple_image', formData, config)
           .then(function (response) {
               if(response.data.status){
-                currentObj.isInitial = true;
-                currentObj.l_url.push(response.data.url)
-                currentObj.form.living_image[index] = currentObj.l_url
+                console.log(response.data.url.length)
+                for(let i=0; i < response.data.url.length; i++){
+                  currentObj.l_url.push(response.data.url[i])
+                }
+                currentObj.form.living_name_image[index] = currentObj.l_url
               }
           })
         .catch(error => {
+          console.log(error)
           this.$notifications.notify(
                 {
                   message: `<span>`+error+`</span>`,
@@ -322,7 +344,7 @@ import AjaxLoader from '../../AjaxLoader.vue';
                   type: 'danger'
                 })
         }).finally( () => {
-          this.loading=false;
+          this.loadingLiving=false;
         })
       },
       onFileChangeKitchen(event){
@@ -340,18 +362,24 @@ import AjaxLoader from '../../AjaxLoader.vue';
           }
           formData.append('path', 'kitchen');
           formData.append('key', 'id_proof');
-          if(currentObj.form.kitchen_image[index]){
-            currentObj.l_url = []
-            currentObj.l_url.push(currentObj.form.kitchen_image[index])
+          if(currentObj.form.kitchen_name_image[index]){
+            currentObj.k_url = []
+            for(let i=0; i < currentObj.form.kitchen_name_image[index].length; i++){
+              currentObj.k_url.push(currentObj.form.kitchen_name_image[index][i])
+            }
           }else{
-            currentObj.l_url = []
+            currentObj.k_url = []
           }
-          axios.post(process.env.VUE_APP_API_URL+'upload_image', formData, config)
+          this.loadingKitchen = true
+          axios.post(process.env.VUE_APP_API_URL+'upload_multiple_image', formData, config)
           .then(function (response) {
               if(response.data.status){
                 currentObj.isInitial = true;
-                currentObj.k_url.push(response.data.url)
-                currentObj.form.kitchen_image[index] = currentObj.k_url
+                for(let i=0; i < response.data.url.length; i++){
+                  currentObj.k_url.push(response.data.url[i])
+                }               
+                currentObj.form.kitchen_name_image[index] = currentObj.k_url
+                console.log(currentObj.form.kitchen_name_image)
               }
           })
         .catch(error => {
@@ -364,7 +392,7 @@ import AjaxLoader from '../../AjaxLoader.vue';
                   type: 'danger'
                 })
         }).finally( () => {
-          this.loading=false;
+          this.loadingKitchen=false;
         })
       },
       onFileChangeBath(event){
@@ -382,19 +410,23 @@ import AjaxLoader from '../../AjaxLoader.vue';
           }
           formData.append('path', 'bathroom');
           formData.append('key', 'id_proof');
-          this.loading=true;
-          if(currentObj.form.bath_image[index]){
-            currentObj.l_url = []
-            currentObj.l_url.push(currentObj.form.bath_image[index])
+          if(currentObj.form.bathroom_name_image[index]){
+            currentObj.b_url = []
+            for(let i=0; i < currentObj.form.bathroom_name_image[index].length; i++){
+              currentObj.b_url.push(currentObj.form.bathroom_name_image[index][i])
+            }
           }else{
-            currentObj.l_url = []
+            currentObj.b_url = []
           }
-          axios.post(process.env.VUE_APP_API_URL+'upload_image', formData, config)
+          this.loadingBathroom=true
+          axios.post(process.env.VUE_APP_API_URL+'upload_multiple_image', formData, config)
           .then(function (response) {
               if(response.data.status){
                 currentObj.isInitial = true;
-                currentObj.b_url.push(response.data.url)
-                currentObj.form.bath_image[index] = currentObj.b_url
+                for(let i=0; i < response.data.url.length; i++){
+                  currentObj.b_url.push(response.data.url[i])
+                }  
+                currentObj.form.bathroom_name_image[index] = currentObj.b_url
               }
           })
         .catch(error => {
@@ -407,7 +439,7 @@ import AjaxLoader from '../../AjaxLoader.vue';
                   type: 'danger'
                 })
         }).finally( () => {
-          this.loading=false;
+          this.loadingBathroom=false;
         })
       },
       onFileChangeFront(event){
@@ -427,16 +459,20 @@ import AjaxLoader from '../../AjaxLoader.vue';
           formData.append('key', 'id_proof');
           if(currentObj.form.front_image){
             currentObj.front_url = []
-            currentObj.front_url.push(currentObj.form.front_image)
+            for(let i=0; i < currentObj.form.front_image.length; i++){
+              currentObj.front_url.push(currentObj.form.front_image[i])
+            }
           }else{
             currentObj.front_url = []
           }
-          axios.post(process.env.VUE_APP_API_URL+'upload_image', formData, config)
+          axios.post(process.env.VUE_APP_API_URL+'upload_multiple_image', formData, config)
           .then(function (response) {
             currentObj.loadingFront = false
               if(response.data.status){
                 currentObj.isInitial = true;
-                currentObj.front_url.push(response.data.url)
+                for(let i=0; i < response.data.url.length; i++){
+                  currentObj.front_url.push(response.data.url[i])
+                } 
                 currentObj.form.front_image = currentObj.front_url
               }
           })
@@ -471,15 +507,19 @@ import AjaxLoader from '../../AjaxLoader.vue';
           this.loadingRear = true
           if(currentObj.form.rear_image){
             currentObj.rear_url = []
-            currentObj.rear_url.push(currentObj.form.rear_image)
+            for(let i=0; i < currentObj.form.rear_url.length; i++){
+              currentObj.rear_url.push(currentObj.form.rear_url[i])
+            }
           }else{
             currentObj.rear_url = []
           }
-          axios.post(process.env.VUE_APP_API_URL+'upload_image', formData, config)
+          axios.post(process.env.VUE_APP_API_URL+'upload_multiple_image', formData, config)
           .then(function (response) {
               if(response.data.status){
                 currentObj.isInitial = true;
-                currentObj.rear_url.push(response.data.url)
+                for(let i=0; i < response.data.url.length; i++){
+                  currentObj.rear_url.push(response.data.url[i])
+                }                
                 currentObj.form.rear_image = currentObj.rear_url
               }
           })
@@ -530,16 +570,68 @@ import AjaxLoader from '../../AjaxLoader.vue';
         if (this.$v.$invalid) {
             return;
         }
-        console.log(this.form)
-        alert('Your data: ' + JSON.stringify(this.form))
+        this.loading=true;
+
+        axios.post(process.env.VUE_APP_API_URL+'property/images', this.form, {
+          headers: {
+              'Authorization' : 'Bearer '+ localStorage.getItem('token')
+          },
+          })
+          .then(response => {
+            this.loading=false;
+            this.isSubmitted=false;
+            console.log(response.status)
+            if(response.status == 200 && response.data){
+              this.$notifications.notify(
+              {
+                message: '<span>'+response.data.message+'</span>',
+                icon: 'nc-icon nc-bell-55',
+                horizontalAlign: 'right',
+                verticalAlign: 'top',
+                type: 'success'
+              })
+              this.$router.push({name: 'PropertyList'});
+            }else{
+              this.$notifications.notify(
+              {
+                message: '<span>'+response.data.error_message+'</span>',
+                icon: 'nc-icon nc-bell-55',
+                horizontalAlign: 'right',
+                verticalAlign: 'top',
+                type: 'danger'
+              })
+            }
+         
+          })
+          .catch(error => {
+            this.$notifications.notify(
+            {
+              message: `<span>Something went wrong.</span>`,
+              icon: 'nc-icon nc-bell-55',
+              horizontalAlign: 'right',
+              verticalAlign: 'top',
+              type: 'danger'
+            })
+              this.isSubmitted=false;
+              this.loading=false;
+          }).finally( () => {
+              this.isSubmitted = false
+              this.loading=false;
+          })
       }
     }
   }
 
 </script>
 <style>
-img {
+.square {
+    width: 120px;
+    height: 110px;
+}
+.square img {
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: cover;
+    padding: 10px;
 }
 </style>

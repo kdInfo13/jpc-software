@@ -48,6 +48,29 @@
                       </td>
                     </slot>
                   </tr>
+                  <tr v-for="(item, index) in tableInvestor" :key="index+tableData.length">
+                    <slot :row="item">
+                      <td>{{index+1+tableData.length}}</td>
+                      <td>{{item.name}}</td>
+                      <td>{{item.email}}</td>
+                      <td>{{item.phone_no}}</td>
+                      <td>
+                        <span v-if="item.typer_of_owner==1">Landlord</span>
+                        <span v-if="item.typer_of_owner==2">Investor</span>
+                      </td>
+                      <td>{{item.door_no}} {{item.street}} {{item.area}}, {{item.postcode}}</td>
+                      <td>
+                        <a v-if="item.id_proof" :href="imagePath+item.id_proof" target="_blank">Click Here</a>
+                        <span v-else>N/A</span>
+                      </td>
+                      <td>
+                        <router-link class="btn btn-info p-2" :to="{ path: '/admin/edit-owner/'+ item.id}">Edit</router-link>
+                        <button type="submit" class="btn btn-danger p-1 ml-2" v-on:click="deleteProfile(item.id, index+tableData.length)">
+                          Delete
+                        </button>
+                      </td>
+                    </slot>
+                  </tr>
                   <tr v-if="tableData.length==0">
                     <td v-if="!loading">No record found.</td>
                   </tr>
@@ -77,6 +100,7 @@
       return {
         imagePath:'',
         tableData : [],
+        tableInvestor:[],
         loading: false
       }
     },
@@ -126,7 +150,9 @@
             })
             .then(response => {
                 if(response.status==200 && response.data.owners){
+                  this.tableInvestor = response.data.investor
                   this.tableData = response.data.owners
+
                 }
                 this.loading=false;
             })

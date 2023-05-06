@@ -42,7 +42,7 @@
                 </div>
 
                 <div class="row">
-                  <div class="col-md-4">
+                  <div :class="class_a">
                     <label>Select Property</label>
                     <select v-model="user.property_id" class="form-control" @change="onChange($event)">
                       <option v-for="(item, index) in tableData" :value="item.id" :key="index">{{  item.name }}</option>
@@ -51,7 +51,7 @@
                       <span v-if="!$v.user.property_id.required">Select property first.</span>
                     </div>
                   </div>
-                  <div class="col-md-4">
+                  <div :class="class_a">
                     <label>Select Property Room</label>
                     <div v-if="roomData.length > 0">
                       <select v-model="user.room_id" class="form-control">
@@ -67,15 +67,23 @@
                       <span v-if="!$v.user.room_id.required">Select property room.</span>
                     </div>
                   </div>
-                  <div class="col-md-4">
+                  <div :class="class_a">
                     <label>Tanency Period</label>
-                    <select v-model="user.tanency_period" class="form-control">
+                    <select v-model="user.tanency_period" class="form-control" @change="onTypeChange">
                       <option value="1">6 Months</option>
                       <option value="2">1 Year</option>
+                      <option value="3">Other</option>
                     </select>
                     <div v-if="isSubmitted && $v.user.tanency_period.$error" class="invalid-feedback">
                       <span v-if="!$v.user.tanency_period.required">Select tanency period.</span>
                     </div>
+                  </div>
+                  <div :class="class_a" v-if="user.tanency_period==3">
+                    <base-input type="text"
+                    label="Other Tanency period"
+                    placeholder="Other Tanency period"
+                    v-model="user.tanency_other"
+                    ></base-input>
                   </div>
                 </div>
 
@@ -159,12 +167,34 @@
                   </div>
                   
                   <div class="col-md-4">
-                    <label>full final settlement</label>
-                    <select v-model="user.full_final_settlement" class="form-control">
-                      <option v-for="index in 31" :key="index" :value="k=index">{{ index }}</option>
+                    <base-input type="text"
+                    label="full final settlement"
+                    placeholder="full final settlement"
+                    v-model="user.full_final_settlement"
+                    ></base-input>
+                  
+                  </div>
+                  <div class="col-md-4">
+                    <base-input type="text"
+                    label="reference"
+                    placeholder="reference"
+                    v-model="user.reference"
+                    ></base-input>
+                  
+                    <div v-if="isSubmitted && $v.user.reference.$error" class="invalid-feedback">
+                      <span v-if="!$v.user.reference.required">reference field is required.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-4">
+                    <label>Select tenant Admin</label>
+                    <select v-model="user.admin_id" class="form-control" @change="onChangeAdmin($event)">
+                      <option v-for="index in admins" :key="index.id" :value="index.id">{{ index.name }}</option>
                     </select>
-                    <div v-if="isSubmitted && $v.user.full_final_settlement.$error" class="invalid-feedback">
-                      <span v-if="!$v.user.full_final_settlement.required">Select rent date.</span>
+                    <div v-if="isSubmitted && $v.user.admin_id.$error" class="invalid-feedback">
+                      <span v-if="!$v.user.admin_id.required">Select admin from list.</span>
                     </div>
                   </div>
                   <div class="col-md-4">
@@ -242,14 +272,17 @@ import AjaxLoader from '../../AjaxLoader.vue';
     },
     data () {
       return {
+        class_a:'col-md-4',
         tableData: [],
         roomData: [],
         managers:'',
+        admins:'',
         loading: false,
         isInitial: false,
         currentuser:'',
         fileName:'',
         user: {
+          reference:'',
           name: '',
           email: '',
           phone_no: '',
@@ -268,7 +301,9 @@ import AjaxLoader from '../../AjaxLoader.vue';
           id_proof:'',
           role_id : "4",
           remarks: '',
-          manager_id:''
+          manager_id:'',
+          admin_id:'',
+          tanency_other:'',
         },
         isSubmitted: false,
         path:''
@@ -276,6 +311,7 @@ import AjaxLoader from '../../AjaxLoader.vue';
     },
     validations: {
       user: {
+        reference: {required},
         name:{required},
         email:{required, email},
         phone_no: {required},
@@ -291,8 +327,8 @@ import AjaxLoader from '../../AjaxLoader.vue';
         tanency_end_date:{required},
         id_proof:{required},
         remarks:{required},
-        full_final_settlement:{required},
-        manager_id:{required}
+        manager_id:{required},
+        admin_id:{required}
       }
     },
     mounted(){
@@ -300,8 +336,47 @@ import AjaxLoader from '../../AjaxLoader.vue';
       this._getProperties();
       this.currentuser = JSON.parse(localStorage.getItem('user'));
       this._getManager(this.currentuser.id);
+      if(this.currentUser.role_id===1){
+        this._getAdmin();
+      }
+      if(this.currentUser.role_id===2){
+        this.user.admin_id = this.currentUser.id
+      }
+      if(this.currentUser.role_id===3){
+        this.user.admin_id = this.currentUser.created_under_admin
+      }    
     },
     methods: {
+      onTypeChange(event){
+        if(event.target.value==3){
+          this.class_a="col-md-3";
+        }else{
+          this.class_a="col-md-4";
+          this.user.tanency_other=''
+        }
+      },
+      _getAdmin(){
+        axios.get(process.env.VUE_APP_API_URL+'admins', {
+          headers: {
+            'Authorization' : 'Bearer '+ localStorage.getItem('token')
+          },
+        }).then(response => {
+          if(response.data){
+            this.admins = response.data.admins
+          }
+        }).catch(error => {
+          this.$notifications.notify(
+          {
+            message: '<span>Somethign went wrong.</span>',
+            icon: 'nc-icon nc-bell-55',
+            horizontalAlign: 'right',
+            verticalAlign: 'top',
+            type: 'danger'
+          })
+        }).finally( () =>{
+
+        })
+       },
       _getManager(id){
         this.loading=true;
           axios.get(process.env.VUE_APP_API_URL+'managers/'+id,{
@@ -330,6 +405,28 @@ import AjaxLoader from '../../AjaxLoader.vue';
               this.loading = false
           })
       },
+      onChangeAdmin(event){
+        axios.get(process.env.VUE_APP_API_URL+'managers/'+event.target.value, {
+          headers: {
+            'Authorization' : 'Bearer '+ localStorage.getItem('token')
+          },
+        }).then(response => {
+          if(response.data){
+            this.managers = response.data.managers
+          }
+        }).catch(error => {
+          this.$notifications.notify(
+          {
+            message: '<span>Somethign went wrong.</span>',
+            icon: 'nc-icon nc-bell-55',
+            horizontalAlign: 'right',
+            verticalAlign: 'top',
+            type: 'danger'
+          })
+        }).finally( () =>{
+
+        })
+       },
       _getProperties(){
           this.loading=true;
           axios.get(process.env.VUE_APP_API_URL+'properties',{
@@ -459,6 +556,7 @@ import AjaxLoader from '../../AjaxLoader.vue';
             
               })
               .catch(error => {
+                console.log(error)
                 if(error.response.status == 401){
                   this.$notifications.notify(
                   {
@@ -491,12 +589,13 @@ import AjaxLoader from '../../AjaxLoader.vue';
 </script>
 <style>
 .image{
-  width: 150px;
-  height: 150px;
-  object-fit: contain;
+  width: 100%;
+  height: 200px;
 }
 .image img {
     width: 100%;
-    height: auto;
+    height: 200px;
+    object-fit: contain;
+
 }
 </style>

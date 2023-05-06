@@ -8,7 +8,16 @@
               <form v-if="!loading">
                 <div>
                   <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
+                      <label>Select Property Type</label>
+                      <select v-model="user.property_type" class="form-control">
+                        <option v-for="(index, k) in propertyType" :key="k" :value="k">{{ index }}</option>
+                      </select>
+                      <div v-if="isSubmitted && $v.user.name.$error" class="invalid-feedback">
+                        <span v-if="!$v.user.name.required">Property name field is required.</span>
+                    </div>
+                    </div>
+                    <div class="col-md-3">
                       <base-input type="text"
                                 label="Property Name"
                                 placeholder="Property Name"
@@ -18,7 +27,7 @@
                         <span v-if="!$v.user.name.required">Property name field is required.</span>
                     </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                       <base-input type="text"
                                 label="Door Number"
                                 placeholder="Door Number"
@@ -28,7 +37,7 @@
                           <span v-if="!$v.user.door_no.required">Door no. field is required.</span>
                       </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                       <base-input type="text"
                                 label="Street"
                                 placeholder="Street"
@@ -118,7 +127,7 @@
                       <label>Property Amenities</label>
                     </div>
                     <div class="col-md-3">
-                      <base-input typep="text"
+                      <base-input typep="number"
                       label="No. of Bedrooms"
                       placeholder="No. of Bedrooms"
                       v-model="user.no_of_bedrooms" >
@@ -128,7 +137,7 @@
                       </div>
                     </div>
                     <div class="col-md-3">
-                      <base-input typep="text"
+                      <base-input typep="number"
                       label="No. of Livingroom"
                       placeholder="No. of Livingroom"
                       v-model="user.no_of_living_areas" >
@@ -138,7 +147,7 @@
                       </div>
                     </div>
                     <div class="col-md-3">
-                      <base-input typep="text"
+                      <base-input typep="number"
                       label="No. of Kitchen"
                       placeholder="No. of Kitchen"
                       v-model="user.no_of_kitchens" >
@@ -148,7 +157,7 @@
                       </div>
                     </div>
                     <div class="col-md-3">
-                      <base-input typep="text"
+                      <base-input typep="number"
                       label="No. of Bathrooms"
                       placeholder="No. of Bathrooms"
                       v-model="user.no_of_bathrooms" >
@@ -201,7 +210,7 @@
                 <div class="row">
                   <div class="col-md-4">
                     <base-input
-                    type="text"
+                    type="number"
                     label="Rent to landlord"
                     placeholder="Rent to landlord"
                     v-model="user.rent_to_landlord"
@@ -265,9 +274,54 @@
                       </div>
                   </div>
                 </div>
-              
-            
 
+                <div class="row">
+                  <div class="col-md-6">
+                    <label>House Images</label><br>
+                    <div class="dropbox">
+                      <input type="file" multiple  @change="onFileChange" class="input-file">
+                        <p v-if="user.house_images.length==0">
+                          Drag your file(s) here to begin<br> or click to browse
+                        </p>
+                        <div class="row">
+                          <div class="col-md-4 square" v-for="(inx, ki) in  user.house_images" :key="inx">
+                            <img :src="imagePath+user.house_images[ki]">
+                          </div>
+                        </div>
+                    </div>
+                    <ajax-loader v-if="loadingRoom"></ajax-loader>
+                  </div>
+                  <div class="col-md-6">
+                    <label>Parking Images</label><br>
+                    <div class=" d-flex">
+                        <div class="form-check-radio">
+                          <label class="form-check-label">
+                            <input type="radio" id="yes" :value=1 v-model="user.parking" />
+                            <span class="form-check-sign">Yes</span>
+                          </label>
+                        </div>
+                        <div class="form-check-radio">
+                          <label class="form-check-label">
+                            <input type="radio" id="no" :value=0 v-model="user.parking" />
+                            <span class="form-check-sign">No</span>
+                          </label>
+                        </div>
+                      </div>
+                    <div class="dropbox-parking" v-if="user.parking">
+                      <input type="file" multiple  @change="onFileChangeParking" class="input-file">
+                        <p v-if="user.parking_images.length==0">
+                          Drag your file(s) here to begin<br> or click to browse
+                        </p>
+                        <div class="row">
+                          <div class="col-md-4 square" v-for="(inx, ki) in  user.parking_images" :key="inx">
+                            <img :src="imagePath+user.parking_images[ki]">
+                          </div>
+                        </div>
+                    </div>
+                    <ajax-loader v-if="loadingRoom"></ajax-loader>
+                  </div>
+                </div>
+              
                 <div class="row mt-4">
                   <div class="col-md-12">
                     <button type="submit" class="btn btn-info btn-fill float-right" @click.prevent="saveProperty">
@@ -315,6 +369,7 @@ import AjaxLoader from '../../AjaxLoader.vue';
     },
     data () {
       return {
+        loadingRoom:false,
         admins: '',
         managers:'',
         currentUser:'',
@@ -322,9 +377,15 @@ import AjaxLoader from '../../AjaxLoader.vue';
         showBackGarden: false,
         isSubmitted:false,
         loading: false,
+        propertyType:{
+          1:'Apartment',
+          2:'Bungalow'
+        },
         ownerList: '',
         investorList:'',
+        imagePath:'',
         user: {
+          property_type:'',
           manager_id:'',
           admin_id:'',
           name: '',
@@ -347,7 +408,10 @@ import AjaxLoader from '../../AjaxLoader.vue';
           rent_date_to_landlord: '',
           rent_to_investor: '',
           rent_start_date_inverent_to_investor:'',
-          rent_date_to_investor: ''
+          rent_date_to_investor: '',
+          house_images:[],
+          parking:0,
+          parking_images:[]
         }
       }
     },
@@ -372,10 +436,13 @@ import AjaxLoader from '../../AjaxLoader.vue';
         rent_date_to_landlord:{required},
         rent_to_investor: {required},
         rent_start_date_to_investor:{required},
-        rent_date_to_investor:{required}
+        rent_date_to_investor:{required},
+        admin_id: {required},
+        manager_id:{required}
       }
     },
     mounted (){
+      this.imagePath = process.env.VUE_APP_IMAGE
       this.currentUser = JSON.parse(localStorage.getItem('user'))
       this._getOwner()
       this._getAdmin();
@@ -410,8 +477,8 @@ import AjaxLoader from '../../AjaxLoader.vue';
         }).finally( () =>{
 
         })
-       },
-       _getManager(id){
+      },
+      _getManager(id){
         axios.get(process.env.VUE_APP_API_URL+'managers/'+id, {
           headers: {
             'Authorization' : 'Bearer '+ localStorage.getItem('token')
@@ -432,8 +499,8 @@ import AjaxLoader from '../../AjaxLoader.vue';
         }).finally( () =>{
 
         })
-       },
-       onChange(event){
+      },
+      onChange(event){
         axios.get(process.env.VUE_APP_API_URL+'managers/'+event.target.value, {
           headers: {
             'Authorization' : 'Bearer '+ localStorage.getItem('token')
@@ -454,7 +521,7 @@ import AjaxLoader from '../../AjaxLoader.vue';
         }).finally( () =>{
 
         })
-       },
+      },
       _getOwner(){
             this.loading=true;
             axios.get(process.env.VUE_APP_API_URL+'owners',{
@@ -484,60 +551,136 @@ import AjaxLoader from '../../AjaxLoader.vue';
             }).finally( () => {
                 this.loading = false
             })
-        },
-    saveProperty () {
-      this.isSubmitted = true;
-      this.$v.$touch();
-      if (this.$v.$invalid) {
-          return;
-      }
-      this.loading=true;
-        axios.post(process.env.VUE_APP_API_URL+'property/create', this.user, {
-            headers: {
-                'Authorization' : 'Bearer '+ localStorage.getItem('token')
-            },
-            })
-            .then(response => {
-              this.loading=false;
-              this.isSubmitted=false;
-              console.log(response.status)
-              if(response.status == 200 && response.data){
+      },
+      onFileChange(event) {
+          event.preventDefault();
+          let currentObj = this;
+          const index = event.target.getAttribute('data-id');
+          const config = {
+              headers: { 'content-type': 'multipart/form-data' }
+          }
+          let formData = new FormData();
+          for (var i = 0; i < event.target.files.length; i++ ){
+              let file = event.target.files[i];
+              formData.append('image[' + i + ']', file);
+          }
+          formData.append('path', 'house');
+          formData.append('key', 'id_proof');
+        
+          this.loadingRoom=true;
+          axios.post(process.env.VUE_APP_API_URL+'upload_multiple_image', formData, config)
+          .then(function (response) {
+              if(response.data.status){
+                for(let i=0; i < response.data.url.length; i++){
+                  currentObj.user.house_images.push(response.data.url[i])
+                }
+              }
+          })
+        .catch(error => {
+          console.log(error)
+          this.$notifications.notify(
+          {
+            message: `<span>`+error+`</span>`,
+            icon: 'nc-icon nc-bell-55',
+            horizontalAlign: 'right',
+            verticalAlign: 'top',
+            type: 'danger'
+          })
+        }).finally( () => {
+          this.loadingRoom=false;
+        })
+      },
+      onFileChangeParking(event) {
+          event.preventDefault();
+          let currentObj = this;
+          const index = event.target.getAttribute('data-id');
+          const config = {
+              headers: { 'content-type': 'multipart/form-data' }
+          }
+          let formData = new FormData();
+          for (var i = 0; i < event.target.files.length; i++ ){
+              let file = event.target.files[i];
+              formData.append('image[' + i + ']', file);
+          }
+          formData.append('path', 'parking');
+          formData.append('key', 'id_proof');
+        
+          this.loadingRoom=true;
+          axios.post(process.env.VUE_APP_API_URL+'upload_multiple_image', formData, config)
+          .then(function (response) {
+              if(response.data.status){
+                for(let i=0; i < response.data.url.length; i++){
+                  currentObj.user.parking_images.push(response.data.url[i])
+                }
+              }
+          })
+        .catch(error => {
+          console.log(error)
+          this.$notifications.notify(
+          {
+            message: `<span>`+error+`</span>`,
+            icon: 'nc-icon nc-bell-55',
+            horizontalAlign: 'right',
+            verticalAlign: 'top',
+            type: 'danger'
+          })
+        }).finally( () => {
+          this.loadingRoom=false;
+        })
+      },
+      saveProperty () {
+        this.isSubmitted = true;
+        this.$v.$touch();
+        if (this.$v.$invalid) {
+            return;
+        }
+        this.loading=true;
+          axios.post(process.env.VUE_APP_API_URL+'property/create', this.user, {
+              headers: {
+                  'Authorization' : 'Bearer '+ localStorage.getItem('token')
+              },
+              })
+              .then(response => {
+                this.loading=false;
+                this.isSubmitted=false;
+                console.log(response.status)
+                if(response.status == 200 && response.data){
+                  this.$notifications.notify(
+                  {
+                    message: '<span>'+response.data.message+'</span>',
+                    icon: 'nc-icon nc-bell-55',
+                    horizontalAlign: 'right',
+                    verticalAlign: 'top',
+                    type: 'success'
+                  })
+                  this.$router.push({name: 'AddNewRoom', params: {'id': response.data.properties.id}});
+                }else{
+                  this.$notifications.notify(
+                  {
+                    message: '<span>'+response.data.error_message+'</span>',
+                    icon: 'nc-icon nc-bell-55',
+                    horizontalAlign: 'right',
+                    verticalAlign: 'top',
+                    type: 'danger'
+                  })
+                }
+            
+              })
+              .catch(error => {
                 this.$notifications.notify(
                 {
-                  message: '<span>'+response.data.message+'</span>',
-                  icon: 'nc-icon nc-bell-55',
-                  horizontalAlign: 'right',
-                  verticalAlign: 'top',
-                  type: 'success'
-                })
-                this.$router.push({name: 'PropertyList'});
-              }else{
-                this.$notifications.notify(
-                {
-                  message: '<span>'+response.data.error_message+'</span>',
+                  message: `<span>Something went wrong.</span>`,
                   icon: 'nc-icon nc-bell-55',
                   horizontalAlign: 'right',
                   verticalAlign: 'top',
                   type: 'danger'
                 })
-              }
-           
-            })
-            .catch(error => {
-              this.$notifications.notify(
-              {
-                message: `<span>Something went wrong.</span>`,
-                icon: 'nc-icon nc-bell-55',
-                horizontalAlign: 'right',
-                verticalAlign: 'top',
-                type: 'danger'
+                  this.isSubmitted=false;
+                  this.loading=false;
+              }).finally( () => {
+                  this.isSubmitted = false
+                  this.loading=false;
               })
-                this.isSubmitted=false;
-                this.loading=false;
-            }).finally( () => {
-                this.isSubmitted = false
-                this.loading=false;
-            })
 
       }
     }
@@ -545,5 +688,19 @@ import AjaxLoader from '../../AjaxLoader.vue';
 
 </script>
 <style>
-
+.dropbox-parking{
+  outline: 2px dashed grey;
+  outline-offset: -10px;
+  background: lightcyan;
+  color: dimgray;
+  padding: 10px 10px;
+  min-height: 100px;
+  position: relative;
+  cursor: pointer;
+}
+.dropbox-parking p{
+  font-size: 1.2em;
+  text-align: center;
+  padding: 30px 0;
+}
 </style>

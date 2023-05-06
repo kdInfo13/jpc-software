@@ -15,7 +15,7 @@
                   <thead>
                     <slot name="columns">
                       <tr>
-                        <th>ID</th>
+                        <th>S.No</th>
                         <th>Type</th>
                         <th>Care Taker Name</th>
                         <th>Start Date</th>
@@ -28,12 +28,16 @@
                   <tbody>
                   <tr v-for="(item, index) in tableData" :key="index">
                     <slot :row="item">
-                      <td>{{item.id}}</td>
-                      <td>{{ item.type }}</td>
+                      <td>{{index+1}}</td>
+                      <td>
+                        <p v-for="(index, i) in propertyType" :key="index">
+                          <span v-if="i==item.type">{{ index }}</span>
+                        </p>
+                      </td>
                       <td>{{item.care_taker_name}}</td>
                       <td>{{item.start_date}}</td>
                       <td>{{item.end_date}}</td>
-                      <td><img :src='item.name'></td>
+                      <td><div class="sequre"> <img :src='imagePath+item.name'></div></td>
                       <td>
                         <router-link class="btn btn-info p-2 ml-2" :to="{ path: '/admin/edit-doc/'+ item.id}">Edit</router-link>
                         <button type="submit" class="btn btn-danger p-1 ml-2" v-on:click="deleteDoc(item.id, index)">
@@ -69,16 +73,48 @@
     },
     data () {
       return {
+        propertyType:'',
+        imagePath:'',
         tableData : [],
         id: '',
         loading: false
       }
     },
     mounted (){
+      this.imagePath = process.env.VUE_APP_IMAGE
       this.id = this.$route.params.id
       this._getProperties(this.$route.params.id);
+      this._getType()
     },
     methods: {
+      _getType(){
+          this.loading=true;
+          axios.get(process.env.VUE_APP_API_URL+'document-types',{
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization' : 'Bearer '+ localStorage.getItem('token')
+            }
+          })
+          .then(response => {
+              if(response.status==200 && response.data.documentTypes){
+                this.propertyType = response.data.documentTypes
+              }
+              this.loading=false;
+          })
+          .catch(error => {
+            this.$notifications.notify(
+            {
+              message: `<span>Something went wrong.</span>`,
+              icon: 'nc-icon nc-bell-55',
+              horizontalAlign: 'right',
+              verticalAlign: 'top',
+              type: 'danger'
+            })
+              this.loading=false;
+          }).finally( () => {
+              this.loading = false
+          })
+      },
       _getProperties(id){
             this.loading=true;
             axios.get(process.env.VUE_APP_API_URL+'document-list/'+id,{
@@ -142,4 +178,12 @@
   }
 </script>
 <style>
+.sequre {
+    width: 100px;
+    height: 100px;
+}
+.sequre img{
+  width: 100%;
+    height: 100%;
+}
 </style>

@@ -13,10 +13,9 @@
                   <thead>
                     <slot name="columns">
                       <tr>
-                        <th>ID</th>
+                        <th>S.no</th>
                         <th>Name</th>
                         <th>Propert Name</th>
-                        <th>Rent Date</th>
                         <th>Rent Amount</th>
                         <th>Action</th>
                       </tr>
@@ -25,13 +24,13 @@
                   <tbody>
                   <tr v-for="(item, index) in tableData" :key="index">
                     <slot :row="item">
-                      <td>{{item.id}}</td>
-                      <td>{{item.tanent.name}}</td>
-                      <td>{{item.property.name}}</td>
-                      <td>{{item.rent_date}}</td>
-                      <td>{{item.rent_amount}}</td>
+                      <td>{{index+1}}</td>
+                      <td>{{item.name}}</td>
+                      <td>{{item.tanent_details.property.name}}</td>
+                      <td>{{item.tanent_details.rent_amount}}</td>
                       <td>
-                        <router-link class="btn btn-info p-2" :to="{ path: '/admin/edit-tenant/'+ item.id}">Edit</router-link>
+                        <router-link class="btn btn-info p-2" :to="{ path: '/admin/add-cash/'+ item.id + '/'+ 'tenant'}">Add Cash</router-link>
+                        <router-link class="btn btn-info p-2 ml-2" :to="{ path: '/admin/edit-tenant/'+ item.id}">Edit</router-link>
                         <button type="submit" class="btn btn-danger p-1 ml-2"  v-on:click="deleteProfile(item.id, index)">
                           Delete
                         </button>

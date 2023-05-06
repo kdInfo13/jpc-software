@@ -19,6 +19,7 @@
                 </div>
                 <div class="col-md-4">
                   <base-input type="email"
+                  readonly
                             label="Email"
                             placeholder="Email"
                             v-model="user.email">
@@ -26,6 +27,7 @@
                   <div v-if="isSubmitted && $v.user.email.$error" class="invalid-feedback">
                   <span v-if="!$v.user.email.required">Email field is required.</span>
                   <span v-if="!$v.user.email.email">Please provide valid email</span>
+
                 </div>
                 </div>
                 <div class="col-md-4">
@@ -41,7 +43,7 @@
               </div>
 
               <div class="row">
-                <div class="col-md-4">
+                <div :class="class_a" >
                   <label>Select Property</label>
                   <select v-model="user.property_id" class="form-control" @change="onChange($event)">
                     <option v-for="(item, index) in tableData" :value="item.id" :key="index">{{  item.name }}</option>
@@ -50,7 +52,7 @@
                     <span v-if="!$v.user.property_id.required">Select property first.</span>
                   </div>
                 </div>
-                <div class="col-md-4">
+                <div :class="class_a" >
                   <label>Select Property Room</label>
                   <div v-if="roomData.length > 0">
                     <select v-model="user.room_id" class="form-control">
@@ -66,16 +68,24 @@
                     <span v-if="!$v.user.room_id.required">Select property room.</span>
                   </div>
                 </div>
-                <div class="col-md-4">
+                <div :class="class_a" >
                   <label>Tanency Period</label>
-                  <select v-model="user.tanency_period" class="form-control">
+                  <select v-model="user.tanency_period" class="form-control" @change="onTypeChange">
                     <option value="1">6 Months</option>
                     <option value="2">1 Year</option>
+                    <option value="3">Other</option>
                   </select>
                   <div v-if="isSubmitted && $v.user.tanency_period.$error" class="invalid-feedback">
                     <span v-if="!$v.user.tanency_period.required">Select tanency period.</span>
                   </div>
                 </div>
+                <div :class="class_a" v-if="user.tanency_period==3">
+                    <base-input type="text"
+                    label="Other Tanency period"
+                    placeholder="Other Tanency period"
+                    v-model="user.tanency_other"
+                    ></base-input>
+                  </div>
               </div>
 
               <div class="row">
@@ -158,24 +168,45 @@
                 </div>
                 
                 <div class="col-md-4">
-                  <label>full final settlement</label>
-                  <select v-model="user.full_final_settlement" class="form-control">
-                    <option v-for="index in 31" :key="index" :value="k=index">{{ index }}</option>
-                  </select>
-                  <div v-if="isSubmitted && $v.user.full_final_settlement.$error" class="invalid-feedback">
-                    <span v-if="!$v.user.full_final_settlement.required">Select rent date.</span>
+                  <base-input type="text"
+                  label="full final settlement"
+                  placeholder="full final settlement"
+                  v-model="user.full_final_settlement"
+                  ></base-input>
+                
+                </div>
+                <div class="col-md-4">
+                  <base-input type="text"
+                  label="reference"
+                  placeholder="reference"
+                  v-model="user.reference"
+                  ></base-input>
+                
+                  <div v-if="isSubmitted && $v.user.reference.$error" class="invalid-feedback">
+                    <span v-if="!$v.user.reference.required">reference field is required.</span>
                   </div>
                 </div>
+              </div>
 
+              <div class="row">
                 <div class="col-md-4">
-                    <label>Select tenant Manager</label>
-                    <select v-model="user.manager_id" class="form-control">
-                      <option v-for="index in managers" :key="index.id" :value="index.id">{{ index.name }}</option>
-                    </select>
-                    <div v-if="isSubmitted && $v.user.manager_id.$error" class="invalid-feedback">
-                      <span v-if="!$v.user.manager_id.required">Select manager from list.</span>
-                    </div>
+                  <label>Select tenant Admin</label>
+                  <select v-model="user.admin_id" class="form-control" @change="onChangeAdmin($event)">
+                    <option v-for="index in admins" :key="index.id" :value="index.id">{{ index.name }}</option>
+                  </select>
+                  <div v-if="isSubmitted && $v.user.admin_id.$error" class="invalid-feedback">
+                    <span v-if="!$v.user.admin_id.required">Select admin from list.</span>
                   </div>
+                </div>
+                <div class="col-md-4">
+                  <label>Select tenant Manager</label>
+                  <select v-model="user.manager_id" class="form-control">
+                    <option v-for="index in managers" :key="index.id" :value="index.id">{{ index.name }}</option>
+                  </select>
+                  <div v-if="isSubmitted && $v.user.manager_id.$error" class="invalid-feedback">
+                    <span v-if="!$v.user.manager_id.required">Select manager from list.</span>
+                  </div>
+                </div>
               </div>
               
               <div class="row">
@@ -212,7 +243,7 @@
                 <div class="col-md-12">
                 <div class="text-center mt-4">
                   <button type="submit" class="btn btn-info btn-fill float-right" @click.prevent="saveProfile">
-                    Update
+                    Save
                   </button>
                   <ajax-loader v-if="loading"></ajax-loader>
                 </div>
@@ -242,14 +273,18 @@ export default {
   },
   data () {
     return {
+      class_a:'col-md-4',
       tableData: [],
       roomData: [],
       managers:'',
-      currentuser:'',
+      admins:'',
       loading: false,
       isInitial: false,
+      currentuser:'',
       fileName:'',
       user: {
+        id:'',
+        reference:'',
         name: '',
         email: '',
         phone_no: '',
@@ -268,7 +303,9 @@ export default {
         id_proof:'',
         role_id : "4",
         remarks: '',
-        manager_id
+        manager_id:'',
+        admin_id:'',
+        tanency_other:''
       },
       isSubmitted: false,
       path:''
@@ -276,6 +313,7 @@ export default {
   },
   validations: {
     user: {
+      reference: {required},
       name:{required},
       email:{required, email},
       phone_no: {required},
@@ -291,98 +329,72 @@ export default {
       tanency_end_date:{required},
       id_proof:{required},
       remarks:{required},
-      full_final_settlement:{required},
-      tanent_id:{required},
-      manager_id:{required}
+      manager_id:{required},
+      admin_id:{required}
     }
   },
   mounted(){
     this.path = process.env.VUE_APP_IMAGE;
     this._getProperties();
-    this._getTenant(this.$route.params.id);
     this.currentuser = JSON.parse(localStorage.getItem('user'));
     this._getManager(this.currentuser.id);
+    if(this.currentUser.role_id===1){
+        this._getAdmin();
+      }
+      if(this.currentUser.role_id===2){
+        this.user.admin_id = this.currentUser.id
+      }
+      if(this.currentUser.role_id===3){
+        this.user.admin_id = this.currentUser.created_under_admin
+      } 
+    this._getTenant(this.$route.params.id);
   },
   methods: {
-    _getManager(id){
-        this.loading=true;
-          axios.get(process.env.VUE_APP_API_URL+'managers/'+id,{
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization' : 'Bearer '+ localStorage.getItem('token')
-            }
-          })
-          .then(response => {
-              if(response.status==200 && response.data.managers){
-                this.managers = response.data.managers
-              }
-              this.loading=false;
-          })
-          .catch(error => {
-            this.$notifications.notify(
-            {
-              message: `<span>Something went wrong.</span>`,
-              icon: 'nc-icon nc-bell-55',
-              horizontalAlign: 'right',
-              verticalAlign: 'top',
-              type: 'danger'
-            })
-              this.loading=false;
-          }).finally( () => {
-              this.loading = false
-          })
+    onTypeChange(event){
+        if(event.target.value==3){
+          this.class_a="col-md-3";
+        }else{
+          this.class_a="col-md-4";
+          this.user.tanency_other=''
+        }
       },
-    _getTenant(id){
-      this.loading = true;
-      axios.get(process.env.VUE_APP_API_URL+'tanent/'+id+'/edit', { 
+    _getAdmin(){
+      axios.get(process.env.VUE_APP_API_URL+'admins', {
         headers: {
-              'Authorization' : 'Bearer '+ localStorage.getItem('token')
+          'Authorization' : 'Bearer '+ localStorage.getItem('token')
+        },
+      }).then(response => {
+        if(response.data){
+          this.admins = response.data.admins
         }
-      }).then((response) => {
-        if(response.status==200 && response.data.tradePersons){
-          this._getRoom(response.data.tradePersons.room.id)
-          this.user.id = response.data.tradePersons.id
-          this.user.tanent_id = response.data.tradePersons.tanent_id
-          this.user.name = response.data.tradePersons.tanent.name
-          this.user.email = response.data.tradePersons.tanent.email
-          this.user.phone_no = response.data.tradePersons.tanent.phone_no
-          this.user.property_id = response.data.tradePersons.property.id
-          this.user.room_id = response.data.tradePersons.room.id
-          this.user.tanency_period = response.data.tradePersons.tanency_period
-          this.user.deposite_amount = response.data.tradePersons.deposite_amount
-          this.user.deposite_date = response.data.tradePersons.deposite_date
-          this.user.rent_amount = response.data.tradePersons.rent_amount
-          this.user.frequency = response.data.tradePersons.frequency
-          this.user.rent_date = response.data.tradePersons.rent_date
-          this.user.tanency_start_date = response.data.tradePersons.tanency_start_date
-          this.user.tanency_end_date = response.data.tradePersons.tanency_end_date
-          this.user.manager_id = response.data.tradePersons.manager_id
-          this.user.id_proof = response.data.tradePersons.id_proof
-          this.user.remarks = response.data.tradePersons.remarks
-          this.user.full_final_settlement = response.data.tradePersons.full_final_settlement
-        }
-        this.loading=false;
-      }).catch( (error) => {
+      }).catch(error => {
+        this.$notifications.notify(
+        {
+          message: '<span>Somethign went wrong.</span>',
+          icon: 'nc-icon nc-bell-55',
+          horizontalAlign: 'right',
+          verticalAlign: 'top',
+          type: 'danger'
+        })
+      }).finally( () =>{
 
       })
-    },
-    _getRoom(id){
+     },
+    _getManager(id){
       this.loading=true;
-        axios.get(process.env.VUE_APP_API_URL+'roomlist/'+id,{
+        axios.get(process.env.VUE_APP_API_URL+'managers/'+id,{
           headers: {
               'Content-Type': 'application/json',
               'Authorization' : 'Bearer '+ localStorage.getItem('token')
           }
         })
         .then(response => {
-          console.log(response)
-            if(response.status==200 && response.data.data){
-              this.roomData = response.data.data
+            if(response.status==200 && response.data.managers){
+              this.managers = response.data.managers
             }
             this.loading=false;
         })
         .catch(error => {
-          console.log(error)
           this.$notifications.notify(
           {
             message: `<span>Something went wrong.</span>`,
@@ -396,6 +408,28 @@ export default {
             this.loading = false
         })
     },
+    onChangeAdmin(event){
+      axios.get(process.env.VUE_APP_API_URL+'managers/'+event.target.value, {
+        headers: {
+          'Authorization' : 'Bearer '+ localStorage.getItem('token')
+        },
+      }).then(response => {
+        if(response.data){
+          this.managers = response.data.managers
+        }
+      }).catch(error => {
+        this.$notifications.notify(
+        {
+          message: '<span>Somethign went wrong.</span>',
+          icon: 'nc-icon nc-bell-55',
+          horizontalAlign: 'right',
+          verticalAlign: 'top',
+          type: 'danger'
+        })
+      }).finally( () =>{
+
+      })
+     },
     _getProperties(){
         this.loading=true;
         axios.get(process.env.VUE_APP_API_URL+'properties',{
@@ -486,6 +520,73 @@ export default {
             this.loading=false;
         })
     },
+    _getRoom(id){
+        this.loading=true;
+          axios.get(process.env.VUE_APP_API_URL+'roomlist/'+id,{
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization' : 'Bearer '+ localStorage.getItem('token')
+            }
+          })
+          .then(response => {
+              if(response.status==200 && response.data.data){
+                this.roomData = response.data.data
+              }
+              this.loading=false;
+          })
+          .catch(error => {
+            console.log(error)
+            this.$notifications.notify(
+            {
+              message: `<span>Something went wrong.</span>`,
+              icon: 'nc-icon nc-bell-55',
+              horizontalAlign: 'right',
+              verticalAlign: 'top',
+              type: 'danger'
+            })
+              this.loading=false;
+          }).finally( () => {
+              this.loading = false
+          })
+      },
+    _getTenant(id){
+    this.loading = true;
+    axios.get(process.env.VUE_APP_API_URL+'tanent/'+id+'/edit', { 
+      headers: {
+            'Authorization' : 'Bearer '+ localStorage.getItem('token')
+      }
+    }).then((response) => {
+      if(response.status==200 && response.data.tanent){
+        this._getRoom(response.data.tanent.tanent_details.property.id)
+        this.user.tanent_id = response.data.tanent.id
+        this.user.reference = response.data.tanent.tanent_details.reference
+        this.user.tanent_id = response.data.tanent.tanent_details.tanent_id
+        this.user.name = response.data.tanent.name
+        this.user.email = response.data.tanent.email
+        this.user.phone_no = response.data.tanent.phone_no
+        this.user.property_id = response.data.tanent.tanent_details.property.id
+        this.user.room_id = response.data.tanent.tanent_details.room.id
+        this.user.tanency_period = response.data.tanent.tanent_details.tanency_period
+        this.user.deposite_amount = response.data.tanent.tanent_details.deposite_amount
+        this.user.deposite_date = response.data.tanent.tanent_details.deposite_date
+        this.user.rent_amount = response.data.tanent.tanent_details.rent_amount
+        this.user.frequency = response.data.tanent.tanent_details.frequency
+        this.user.rent_date = response.data.tanent.tanent_details.rent_date
+        this.user.tanency_start_date = response.data.tanent.tanent_details.tanency_start_date
+        this.user.tanency_end_date = response.data.tanent.tanent_details.tanency_end_date
+        this._getManager(response.data.tanent.created_under_admin)
+        this.user.manager_id = response.data.tanent.created_under_manager
+        this.user.admin_id = response.data.tanent.created_under_admin
+        this.user.id_proof = response.data.tanent.tanent_details.id_proof
+        this.user.remarks = response.data.tanent.tanent_details.remarks
+        this.user.full_final_settlement = response.data.tanent.tanent_details.full_final_settlement
+        console.log(this.user)
+      }
+      this.loading=false;
+    }).catch( (error) => {
+
+    })
+    },
     saveProfile () {
         this.isSubmitted = true;
         this.$v.$touch();
@@ -525,6 +626,7 @@ export default {
           
             })
             .catch(error => {
+              console.log(error)
               if(error.response.status == 401){
                 this.$notifications.notify(
                 {
@@ -556,13 +658,14 @@ export default {
 
 </script>
 <style>
-.image{
-width: 150px;
-height: 150px;
-object-fit: contain;
-}
-.image img {
+  .image{
   width: 100%;
-  height: auto;
-}
+  height: 200px;
+  }
+  .image img {
+    width: 100%;
+    height: 200px;
+    object-fit: contain;
+
+  }
 </style>

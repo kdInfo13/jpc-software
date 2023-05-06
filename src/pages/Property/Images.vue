@@ -4,42 +4,19 @@
       <div class="row">
         <div class="col-12">
           <card class="card-plain">
-          <div class="row">
-            <div class="col-6"><h4 class="card-title">Trader List</h4></div>
-            <div class="col-6"><router-link class="d-flex justify-content-end" to="/admin/new-trade">Add New</router-link></div>
-          </div>
-            <div class="table-responsive">
-              <table class="table">
-                  <thead>
-                    <slot name="columns">
-                      <tr>
-                        <th>S.No</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Action</th>
-                      </tr>
-                    </slot>
-                  </thead>
-                  <tbody>
-                  <tr v-for="(item, index) in tableData" :key="index">
-                    <slot :row="item">
-                      <td>{{index+1}}</td>
-                      <td>{{item.name}}</td>
-                      <td>{{item.email}}</td>
-                      <td>{{item.phone_no}}</td>
-                      <td>
-                        <router-link class="btn btn-info p-2" :to="{ path: '/admin/edit-trade/'+ item.id}">Edit</router-link>
-                        <button type="submit" class="btn btn-danger p-1 ml-2" v-on:click="deleteProfile(item.id, index)">
-                          Delete
-                        </button>
-                        
-                      </td>
-                    </slot>
-                  </tr>
-                  </tbody>
-                </table>
-                <ajax-loader v-if="loading"></ajax-loader>
+            <div class="row" v-for="(index, i) in tableData" :key="i">
+              <div class="col-md-12" v-for="(item, k) in index" :key="k">
+                <div class="row"> 
+                  <div class="col-md-12"><h2>{{ item.name }}</h2></div>
+                  <div class="col-md-3" v-for="image in item.images" :key="image.id">
+                    <img  :src="imagePath+image.name"  alt="" class="img-thumbnail">
+                    <a :href="imagePath+image.name" class="text-success" target="_blank">View</a>
+                    <span class="delete text-danger ml-4" v-on:click="deleteImage(image.id)">Delete</span>
+                  </div>
+                </div>
+                <hr>
+              </div>
+              <hr>
             </div>
           </card>
         </div>
@@ -48,38 +25,37 @@
   </div>
 </template>
 <script>
+  import axios from "axios";
   import LTable from 'src/components/Table.vue'
   import Card from 'src/components/Cards/Card.vue'
-  import AjaxLoader from '../../AjaxLoader.vue';
-  import axios from "axios";
-
   export default {
     components: {
       LTable,
-      Card,
-      AjaxLoader
+      Card
     },
     data () {
       return {
+        imagePath:'',
         tableData : [],
         loading: false
       }
     },
     mounted (){
-        this._getTraders()
+      this.imagePath = process.env.VUE_APP_IMAGE
+      this._getProperties(this.$route.params.id);
     },
     methods: {
-      _getTraders(){
-        this.loading=true;
-            axios.get(process.env.VUE_APP_API_URL+'trade-persons-list',{
+      _getProperties(id){
+            this.loading=true;
+            axios.get(process.env.VUE_APP_API_URL+'property-images/'+id,{
               headers: {
                   'Content-Type': 'application/json',
                   'Authorization' : 'Bearer '+ localStorage.getItem('token')
               }
             })
             .then(response => {
-                if(response.status==200 && response.data.tradePersons){
-                  this.tableData = response.data.tradePersons
+                if(response.status==200 && response.data.propertiesImages){
+                  this.tableData = response.data.propertiesImages
                 }
                 this.loading=false;
             })
@@ -97,9 +73,9 @@
                 this.loading = false
             })
       },
-      deleteProfile (id, index) {
+      deleteImage (id) {
         if(confirm("Do you really want to delete?")){
-          axios.delete(process.env.VUE_APP_API_URL+'trade-person/'+id, {
+          axios.get(process.env.VUE_APP_API_URL+'delete-image/'+id, {
           headers: {
                 'Content-Type': 'application/json',
                 'Authorization' : 'Bearer '+ localStorage.getItem('token')
@@ -114,7 +90,7 @@
                   verticalAlign: 'top',
                   type: 'success'
                 })
-                this.tableData.splice(index, 1);
+                this._getProperties(this.$route.params.id);
             })
             .catch(error => {
               this.$notifications.notify(
@@ -127,9 +103,12 @@
                 })
             })
         }
-      },
+      }
     }
   }
 </script>
 <style>
+span.delete {
+    cursor: pointer;
+}
 </style>

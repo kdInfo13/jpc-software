@@ -5,7 +5,7 @@
         <div class="col-12">
           <card class="card-plain">
           <div class="row">
-            <div class="col-6"><h4 class="card-title">Trader List</h4></div>
+            <div class="col-6"><h4 class="card-title">Complaints List</h4></div>
             <div class="col-6"><router-link class="d-flex justify-content-end" to="/admin/new-trade">Add New</router-link></div>
           </div>
             <div class="table-responsive">
@@ -14,9 +14,12 @@
                     <slot name="columns">
                       <tr>
                         <th>S.No</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
+                        <th>Tenant Name</th>
+                        <th>Property</th>
+                        <th>Description</th>
+                        <th>Remarks</th>
+                        <th>Prority</th>
+                        <th>Status</th>
                         <th>Action</th>
                       </tr>
                     </slot>
@@ -25,11 +28,21 @@
                   <tr v-for="(item, index) in tableData" :key="index">
                     <slot :row="item">
                       <td>{{index+1}}</td>
-                      <td>{{item.name}}</td>
-                      <td>{{item.email}}</td>
-                      <td>{{item.phone_no}}</td>
+                      <td>{{item.tenant.name}}</td>
+                      <td>{{item.property.name}} - {{ item.room.name }}</td>
+                      <td>{{ item.description }}</td>
+                      <td>{{ item.remarks }}</td>
                       <td>
-                        <router-link class="btn btn-info p-2" :to="{ path: '/admin/edit-trade/'+ item.id}">Edit</router-link>
+                        <span v-if="item.prority==1">High</span>
+                        <span v-if="item.prority==2">Medium</span>
+                        <span v-if="item.prority==3">Low</span>
+                      </td>
+                      <td>
+                        <span v-if="item.status==1">Open</span>
+                        <span v-if="item.status==2">Closed</span>
+                      </td>
+                      <td>
+                        <router-link class="btn btn-info p-2" :to="{ path: '/admin/view-complaint/'+ item.id}">View</router-link>
                         <button type="submit" class="btn btn-danger p-1 ml-2" v-on:click="deleteProfile(item.id, index)">
                           Delete
                         </button>
@@ -71,15 +84,15 @@
     methods: {
       _getTraders(){
         this.loading=true;
-            axios.get(process.env.VUE_APP_API_URL+'trade-persons-list',{
+            axios.get(process.env.VUE_APP_API_URL+'complaints',{
               headers: {
                   'Content-Type': 'application/json',
                   'Authorization' : 'Bearer '+ localStorage.getItem('token')
               }
             })
             .then(response => {
-                if(response.status==200 && response.data.tradePersons){
-                  this.tableData = response.data.tradePersons
+                if(response.status==200 && response.data.complaints){
+                  this.tableData = response.data.complaints
                 }
                 this.loading=false;
             })

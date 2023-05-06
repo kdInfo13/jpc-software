@@ -10,9 +10,13 @@
                   <div class="row">
                     <div class="col-md-4">
                       <label>Type</label>
-                      <select v-model="form.type" class="form-control">
+                      <select v-model="form.type" class="form-control"  @change="onTypeChange">
                         <option v-for="(item, index) in propertyType" :key="index" :value="index">{{ item }}</option>
                       </select>
+                    </div>
+                    <div class="col-md-4" v-if="form.type==10">
+                      <label>Other Doc Name</label>
+                      <input type="text" v-model="form.other_doc" class="form-control" placeholder="Other Doc Name">
                     </div>
                     <div class="col-md-4">
                       <label>Care Taker Name</label>
@@ -21,10 +25,7 @@
                         <span v-if="!$v.form.care_taker_name.required">Care taker field is required.</span>
                       </div>
                     </div>
-                    <div class="col-md-4">
-                      <label>File</label>
-                      <input type="file" @change="onFileChange">
-                    </div>
+                    
                   </div>
                   <div class="row">
                     <div class="col-md-4">
@@ -41,6 +42,24 @@
                         <span v-if="!$v.form.end_date.required">End date field is required.</span>
                       </div>
                     </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <label>Documents Image</label><br>
+                    <div class="dropbox">
+                      <input type="file"  @change="onFileChange" class="input-file">
+                        <p v-if="!form.pdf_name">
+                          Drag your file(s) here to begin<br> or click to browse
+                        </p>
+                        <div class="row">
+                          <div class="col-md-4 square" v-if="form.pdf_name">
+                            <img :src="imagePath+form.pdf_name">
+                          </div>
+                        </div>
+                    </div>
+                    <ajax-loader v-if="loadingRoom"></ajax-loader>
                   </div>
                 </div>
               
@@ -91,16 +110,19 @@ import AjaxLoader from '../../AjaxLoader.vue';
     },
     data () {
       return {
+        loadingRoom:false,
         isSubmitted:false,
         propertyType:[],
         loading: false,
+        imagePath:'',
         form: {
           property_id: '',
           type: '',
           pdf_name: '',
           care_taker_name: '',
           start_date: '',
-          end_date:''
+          end_date:'',
+          other_doc:''
         }
       }
     },
@@ -111,10 +133,11 @@ import AjaxLoader from '../../AjaxLoader.vue';
         pdf_name:{required},
         care_taker_name:{required},
         start_date:{required},
-        end_date:{required}
+        end_date:{required},
       }
     },
     mounted(){
+      this.imagePath = process.env.VUE_APP_IMAGE
       this.form.property_id =this.$route.params.id
       this._getType()
     },
@@ -146,6 +169,13 @@ import AjaxLoader from '../../AjaxLoader.vue';
           }).finally( () => {
               this.loading = false
           })
+      },
+      onTypeChange(event){
+        if(event.target.value==10){
+
+        }else{
+          this.form.other_doc=''
+        }
       },
       onFileChange(event) {
         event.preventDefault();

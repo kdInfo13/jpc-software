@@ -12,10 +12,6 @@
                       <select  v-model="user.role_id" disabled class="form-control">
                         <option v-for="(index, i) in roles" :key="index" :value="i">{{ index }}</option>
                       </select>
-                
-                    <div v-if="isSubmitted && $v.user.role_id.$error" class="invalid-feedback">
-                    <span v-if="!$v.user.role_id.required">Select role is required.</span>
-                  </div>
                   </div>
                 <div class="col-md-6">
                   <base-input type="text"
@@ -80,7 +76,10 @@ export default {
   },
   data () {
     return {
-      roles:'',
+      roles:{
+          2:'Admin',
+          3:'Manager'
+        },
       permissions:'',
       currentUser:'',
       showPermission: false,
@@ -105,9 +104,13 @@ export default {
   mounted(){
     this._getUser(this.$route.params.id);
     this.currentUser =  JSON.parse(localStorage.getItem('user'));
-    this._getRole();
     this._getPermission();
-    this._getAdmin();
+    if(this.currentUser.role_id==1){
+        this._getAdmin();
+      }
+      if(this.currentUser.role_id==2){
+        this.user.admin_id = this.currentUser.id
+      }
   },
   methods: {
       _getUser(id){
@@ -151,15 +154,6 @@ export default {
                 this.loading = false
             })
       },
-    onChange(event){
-      if(event.target.value==3){
-        this.showPermission=true
-      }else{
-        this.user.permission=[]
-        this.user.admin_id=''
-        this.showPermission=false
-      }
-    },
     _getAdmin(){
       axios.get(process.env.VUE_APP_API_URL+'admins', {
         headers: {
@@ -204,30 +198,7 @@ export default {
 
       })
     },
-    _getRole(){
-      axios.get(process.env.VUE_APP_API_URL+'roles', {
-        headers: {
-          'Authorization' : 'Bearer '+ localStorage.getItem('token')
-        },
-      }).then(response => {
-        if(response.data){
-          this.roles = response.data.roles
-        }
-      }).catch(error => {
-        this.$notifications.notify(
-        {
-          message: '<span>Somethign went wrong.</span>',
-          icon: 'nc-icon nc-bell-55',
-          horizontalAlign: 'right',
-          verticalAlign: 'top',
-          type: 'danger'
-        })
-      }).finally( () =>{
-
-      })
-    },
     saveProfile () {
-      
       this.isSubmitted = true;
       this.adminerror=false;
       this.$v.$touch();
@@ -243,7 +214,6 @@ export default {
           .then(response => {
             this.loading=false;
             this.isSubmitted=false;
-            console.log(response)
             if(response.status == 200 && response.data){
               this.$notifications.notify(
               {
@@ -253,7 +223,11 @@ export default {
                 verticalAlign: 'top',
                 type: 'success'
               })
-              this.$router.push({name: 'User'});
+              if(this.user.role_id == 2){
+                window.location.href = "/admin/user-list"
+              }else{
+                window.location.href = "/admin/user-list#manager-list"
+              }
             }else{
               this.$notifications.notify(
               {
@@ -267,6 +241,7 @@ export default {
          
           })
           .catch(error => {
+            console.log(error)
             if(error.response.status == 422){
               this.$notifications.notify(
               {

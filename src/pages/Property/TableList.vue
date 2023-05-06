@@ -5,7 +5,7 @@
         <div class="col-12">
           <card class="card-plain">
           <div class="row">
-            <div class="col-6"><h4 class="card-title">Property List</h4></div>
+            <div class="col-6"><h4 class="card-title">Properties</h4></div>
             <div class="col-6">
               <router-link class="d-flex justify-content-end" to="/admin/new-property">Add New</router-link>
             </div>
@@ -15,7 +15,7 @@
                   <thead>
                     <slot name="columns">
                       <tr>
-                        <th>ID</th>
+                        <th>S.No</th>
                         <th>Property Name</th>
                         <th>Address</th>
                         <th>Action</th>
@@ -25,13 +25,16 @@
                   <tbody>
                   <tr v-for="(item, index) in tableData" :key="index">
                     <slot :row="item">
-                      <td>{{item.id}}</td>
+                      <td>{{index+1}}</td>
                       <td>{{item.name}}</td>
                       <td>{{item.door_no}} {{item.street}} {{item.area}} {{item.county}} {{item.postcode}} </td>
                       <td>
-                        <router-link class="btn btn-info p-2" :to="{ path: '/admin/add-amenities/'+ item.id}">Rooms</router-link>
+                        <router-link class="btn btn-info p-2" :to="{ path: '/admin/add-cash/'+ item.id + '/'+ 'property'}">Add Cash</router-link>
+                        <router-link class="btn btn-info p-2 ml-2" :to="{ path: '/admin/property-image/'+ item.id}">Images</router-link>
                         <router-link class="btn btn-info p-2 ml-2" :to="{ path: '/admin/doc-list/'+ item.id}">Document</router-link>
-                        <router-link class="btn btn-info p-2 ml-2" :to="{ path: '/admin/new-property-expense/'+ item.id}">Expense</router-link>
+                        <router-link class="btn btn-info p-2 ml-2" :to="{ path: '/admin/property-expense/'+ item.id}">Expense</router-link>
+                        <router-link class="btn btn-info p-2 ml-2" :to="{ path: '/admin/property-view/'+ item.id}">View</router-link>
+                        <router-link class="btn btn-info p-2 ml-2" :to="{ path: '/admin/maintenance/'+ item.id}">Maintenance</router-link>
                         <router-link class="btn btn-info p-2 ml-2" :to="{ path: '/admin/edit-property/'+ item.id}">Edit</router-link>
                         <button type="submit" class="btn btn-danger p-1 ml-2" @click.prevent="deleteProfile">
                           Delete

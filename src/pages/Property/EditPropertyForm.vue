@@ -2,11 +2,12 @@
   <div class="content">
     <div class="container-fluid">
       <div class="row">
+        <div class="col-md-12">
         <card>
-        <div class="col-12">
-            <h4 slot="header" class="card-title">Edit Property</h4>
-            <form v-if="!loading">
-              <div>
+        <ajax-loader v-if="loading"></ajax-loader>
+          <h4 slot="header" class="card-title">Edit Property
+          </h4>
+            <form>
                 <div class="row">
                   <div class="col-md-4">
                     <base-input type="text"
@@ -74,7 +75,25 @@
                 </div>
 
                 <div class="row">
-                  <div class="col-md-6">
+                  <div class="col-md-3" v-if="currentUser.role_id==1">
+                      <label>Select Admin</label>
+                      <select v-model="user.admin_id" class="form-control" @change="onChange($event)">
+                        <option v-for="(admin, index) in admins" :key="index" :value="admin.id">{{ admin.name }}</option>
+                      </select>
+                      <div v-if="isSubmitted && $v.user.admin_id.$error" class="invalid-feedback">
+                          <span v-if="!$v.user.admin_id.required">Admin field is required.</span>
+                      </div>
+                    </div>
+                    <div class="col-md-3" v-if="currentUser.role_id==1 || currentUser.role_id==2">
+                      <label>Select Manager</label>
+                      <select v-model="user.manager_id" class="form-control">
+                        <option v-for="(manager, index) in managers" :key="index" :value="manager.id">{{ manager.name }}</option>
+                      </select>
+                      <div v-if="isSubmitted && $v.user.manager_id.$error" class="invalid-feedback">
+                          <span v-if="!$v.user.manager_id.required">Landlord field is required.</span>
+                      </div>
+                    </div>
+                  <div class="col-md-3">
                     <label>Select Landlord</label>
                     <select v-model="user.landlord_id" class="form-control">
                       <option v-for="(owner, index) in ownerList" :key="index" :value="owner.id">{{ owner.name }}</option>
@@ -83,7 +102,7 @@
                         <span v-if="!$v.user.landlord_id.required">Landlord field is required.</span>
                     </div>
                   </div>
-                  <div class="col-md-6">
+                  <div class="col-md-3">
                     <label>Select Investor</label>
                     <select v-model="user.investor_id" class="form-control">
                       <option v-for="(owner, index) in investorList" :key="index" :value="owner.id">{{ owner.name }}</option>
@@ -101,6 +120,7 @@
                   </div>
                   <div class="col-md-3">
                     <base-input typep="text"
+                    readonly
                     label="No. of Bedrooms"
                     placeholder="No. of Bedrooms"
                     v-model="user.no_of_bedrooms" >
@@ -111,6 +131,7 @@
                   </div>
                   <div class="col-md-3">
                     <base-input typep="text"
+                    readonly
                     label="No. of Livingroom"
                     placeholder="No. of Livingroom"
                     v-model="user.no_of_living_areas" >
@@ -121,6 +142,7 @@
                   </div>
                   <div class="col-md-3">
                     <base-input typep="text"
+                    readonly
                     label="No. of Kitchen"
                     placeholder="No. of Kitchen"
                     v-model="user.no_of_kitchens" >
@@ -131,6 +153,7 @@
                   </div>
                   <div class="col-md-3">
                     <base-input typep="text"
+                    readonly
                     label="No. of Bathrooms"
                     placeholder="No. of Bathrooms"
                     v-model="user.no_of_bathrooms" >
@@ -178,12 +201,11 @@
                   </div>
                
                 </div>
-              </div>
 
               <div class="row">
                 <div class="col-md-4">
                   <base-input
-                  type="text"
+                  type="number"
                   label="Rent to landlord"
                   placeholder="Rent to landlord"
                   v-model="user.rent_to_landlord"
@@ -248,8 +270,6 @@
                 </div>
               </div>
             
-          
-
               <div class="row mt-4">
                 <div class="col-md-12">
                   <button type="submit" class="btn btn-info btn-fill float-right" @click.prevent="saveProperty">
@@ -260,10 +280,8 @@
 
               <div class="clearfix"></div>
             </form>
-            <ajax-loader v-if="loading"></ajax-loader>
-
-        </div>
       </card>
+    </div>
       </div>
     </div>
 </div>
@@ -278,7 +296,6 @@ import {
     required,
     email,
 } from "vuelidate/lib/validators";
-import Card from 'src/components/Cards/Card.vue'
 import AmenitiesImage from 'src/components/AmenitiesImage.vue'
 import BaseCheckbox from '../../components/Inputs/BaseCheckbox.vue'
 import BaseRadio from '../../components/Inputs/BaseRadio.vue'
@@ -288,7 +305,6 @@ import AjaxLoader from '../../AjaxLoader.vue';
 
 export default {
   components: {
-    Card,
     BaseCheckbox,
     AmenitiesImage,
     BaseRadio,
@@ -297,6 +313,10 @@ export default {
   },
   data () {
     return {
+      room_id:'',
+      currentUser:'',
+      admins:'',
+      managers:'',
       showFrontGarden: false,
       showBackGarden: false,
       isSubmitted:false,
@@ -304,7 +324,9 @@ export default {
       ownerList: '',
       investorList:'',
       user: {
-        id:'',
+        manager_id:'',
+        admin_id:'',
+        property_id:'',
         name: '',
         door_no: '',
         street: '',
@@ -323,7 +345,6 @@ export default {
         rent_start_date_to_landlord:'',
         rent_date_to_landlord: '',
         rent_to_investor: '',
-        rent_start_date_inverent_to_investor:'',
         rent_date_to_investor: ''
       }
     }
@@ -349,14 +370,71 @@ export default {
       rent_date_to_landlord:{required},
       rent_to_investor: {required},
       rent_start_date_to_investor:{required},
-      rent_date_to_investor:{required}
+      rent_date_to_investor:{required},
+      admin_id: {required},
+      manager_id:{required}
     }
   },
   mounted (){
+      this.currentUser = JSON.parse(localStorage.getItem('user'))
       this._getOwner()
+      this._getAdmin();
+      this.room_id = this.$route.params.id
       this.getProperty(this.$route.params.id)
+      if(this.currentUser.role_id===2){
+        this.user.admin_id = this.currentUser.id
+        this._getManager(this.currentUser.id);
+      }
+      if(this.currentUser.role_id===3){
+        this.user.admin_id = this.currentUser.created_under_admin
+        this.user.manager_id = this.currentUser.id
+      }
   },
   methods: {
+    _getAdmin(){
+        axios.get(process.env.VUE_APP_API_URL+'admins', {
+          headers: {
+            'Authorization' : 'Bearer '+ localStorage.getItem('token')
+          },
+        }).then(response => {
+          if(response.data){
+            this.admins = response.data.admins
+          }
+        }).catch(error => {
+          this.$notifications.notify(
+          {
+            message: '<span>Somethign went wrong.</span>',
+            icon: 'nc-icon nc-bell-55',
+            horizontalAlign: 'right',
+            verticalAlign: 'top',
+            type: 'danger'
+          })
+        }).finally( () =>{
+
+        })
+    },
+    onChange(event){
+        axios.get(process.env.VUE_APP_API_URL+'managers/'+event.target.value, {
+          headers: {
+            'Authorization' : 'Bearer '+ localStorage.getItem('token')
+          },
+        }).then(response => {
+          if(response.data){
+            this.managers = response.data.managers
+          }
+        }).catch(error => {
+          this.$notifications.notify(
+          {
+            message: '<span>Somethign went wrong.</span>',
+            icon: 'nc-icon nc-bell-55',
+            horizontalAlign: 'right',
+            verticalAlign: 'top',
+            type: 'danger'
+          })
+        }).finally( () =>{
+
+        })
+    },
     getProperty(id){
       this.loading=true;
           axios.get(process.env.VUE_APP_API_URL+'property/'+id+'/edit',{
@@ -367,7 +445,10 @@ export default {
           })
           .then(response => {
               if(response.status==200 && response.data.property){
-                this.user.id = response.data.property.id
+                this._getManager(response.data.property.admin_id)
+                this.user.property_id = response.data.property.id
+                this.user.admin_id = response.data.property.admin_id
+                this.user.manager_id = response.data.property.manager_id
                 this.user.area = response.data.property.area
                 this.user.county = response.data.property.county
                 this.user.door_no = response.data.property.door_no
@@ -406,45 +487,58 @@ export default {
               this.loading = false
           })
     },
-    _getOwner(){
-          this.loading=true;
-          axios.get(process.env.VUE_APP_API_URL+'owners',{
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization' : 'Bearer '+ localStorage.getItem('token')
-            }
+    _getManager(id){
+        axios.get(process.env.VUE_APP_API_URL+'managers/'+id, {
+          headers: {
+            'Authorization' : 'Bearer '+ localStorage.getItem('token')
+          },
+        }).then(response => {
+          if(response.data){
+            this.managers = response.data.managers
+          }
+        }).catch(error => {
+          this.$notifications.notify(
+          {
+            message: '<span>Somethign went wrong.</span>',
+            icon: 'nc-icon nc-bell-55',
+            horizontalAlign: 'right',
+            verticalAlign: 'top',
+            type: 'danger'
           })
-          .then(response => {
-              if(response.status==200 && response.data.owners){
-                const tmpOwner = [];
-                const tmpInvestor = [];
-                response.data.owners.map(function(value, key){
-                  if(value.typer_of_owner==1){
-                    tmpOwner.push(value)
-                  }else{
-                    tmpInvestor.push(value)
-                  }
-                })
-                this.ownerList = tmpOwner
-                this.investorList = tmpInvestor
-              }
-              this.loading=false;
-          })
-          .catch(error => {
-            console.log(error)
-            this.$notifications.notify(
-            {
-              message: `<span>Something went wrong.</span>`,
-              icon: 'nc-icon nc-bell-55',
-              horizontalAlign: 'right',
-              verticalAlign: 'top',
-              type: 'danger'
-            })
-              this.loading=false;
-          }).finally( () => {
-              this.loading = false
-          })
+        }).finally( () =>{
+
+        })
     },
+    _getOwner(){
+            this.loading=true;
+            axios.get(process.env.VUE_APP_API_URL+'owners',{
+              headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization' : 'Bearer '+ localStorage.getItem('token')
+              }
+            })
+            .then(response => {
+                if(response.status==200 && response.data.owners){
+                  this.ownerList = response.data.owners
+                  this.investorList = response.data.investor
+                }
+                this.loading=false;
+            })
+            .catch(error => {
+              console.log(error)
+              this.$notifications.notify(
+              {
+                message: `<span>Something went wrong.</span>`,
+                icon: 'nc-icon nc-bell-55',
+                horizontalAlign: 'right',
+                verticalAlign: 'top',
+                type: 'danger'
+              })
+                this.loading=false;
+            }).finally( () => {
+                this.loading = false
+            })
+        },
     saveProperty () {
     this.isSubmitted = true;
     this.$v.$touch();
@@ -452,7 +546,7 @@ export default {
         return;
     }
     this.loading=true;
-      axios.post(process.env.VUE_APP_API_URL+'property/create', this.user, {
+      axios.post(process.env.VUE_APP_API_URL+'property/update', this.user, {
           headers: {
               'Authorization' : 'Bearer '+ localStorage.getItem('token')
           },
@@ -470,7 +564,7 @@ export default {
                 verticalAlign: 'top',
                 type: 'success'
               })
-              this.$router.push({name: 'PropertyList'});
+              this.$router.push({name: 'EditNewRoom', params: {'id': this.user.property_id}});
             }else{
               this.$notifications.notify(
               {

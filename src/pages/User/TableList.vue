@@ -10,14 +10,14 @@
             </div>
             <div class="col-6"><router-link class="d-flex justify-content-end" to="/admin/add-user">Add New</router-link></div>
           </div>
-          <div class="table-responsive">
+          <div class="table-responsive" v-if="!loading && currentuser">
               <tabs>
-                  <tab name="Admin List"  v-if="currentuser.role_id==1">
+                  <tab name="Admin List" class="active" v-if="currentuser.role_id==1">
                     <table class="table">
                       <thead>
                         <slot name="columns">
                           <tr>
-                            <th>ID</th>
+                            <th>S.No</th>
                             <th>Name</th>
                             <th>Email</th>
                             <th>Role</th>
@@ -45,7 +45,7 @@
                   </table>
                   </tab>
 
-                  <tab name="Manager List">
+                  <tab name="Manager List" v-if="currentuser || currentuser.role_id==1 || currentuser.role_id==2">
                     <table class="table">
                       <thead>
                         <slot name="columns">

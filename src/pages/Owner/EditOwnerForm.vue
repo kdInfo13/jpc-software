@@ -4,7 +4,7 @@
       <div class="row">
         <div class="col-12">
           <card>
-            <h4 slot="header" class="card-title">Edit Owner/Investors</h4>
+            <h4 slot="header" class="card-title">Edit Landlord/Investors</h4>
             <form v-if="user && !loading">
               <div class="row">
                 <div class="col-md-4">
@@ -113,7 +113,7 @@
                   </div>
                 </div>
                 <div class="col-md-4">
-                  <base-input type="text"
+                  <base-input type="number"
                     label="Account Number"
                     placeholder="Account Number"
                     v-model="user.account_no"
@@ -123,7 +123,7 @@
                   </div>
                 </div>
                 <div class="col-md-4">
-                  <base-input type="text"
+                  <base-input type="number"
                     label="Sort Code"
                     placeholder="Sort Code"
                     v-model="user.sort_code"
@@ -231,7 +231,9 @@ export default {
   mounted() {
     this.currentUser = JSON.parse(localStorage.getItem('user'))
     this.imagePath = process.env.VUE_APP_IMAGE
-    this._getAdmin();
+    if(this.currentUser.role_id===1){
+      this._getAdmin();
+    }
     if(this.currentUser.role_id===2){
         this.user.admin_id = this.currentUser.id
       }

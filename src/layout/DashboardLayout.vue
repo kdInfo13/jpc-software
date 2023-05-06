@@ -1,6 +1,7 @@
 <template>
   <div class="wrapper">
     <side-bar>
+      <div v-if="currentUser.role_id==1 || currentUser.role_id==2 || currentUser.role_id==3">
       <mobile-menu slot="content"></mobile-menu>
       <sidebar-link to="/admin/overview">
         <i class="nc-icon nc-chart-pie-35"></i>
@@ -16,7 +17,7 @@
       </sidebar-link>
       <sidebar-link to="/admin/owner-list">
         <i class="nc-icon nc-circle-09"></i>
-        <p>Owner / Investors</p>
+        <p>Landlord / Investors</p>
       </sidebar-link>
       <sidebar-link to="/admin/tenants-list">
         <i class="nc-icon nc-circle-09"></i>
@@ -24,29 +25,36 @@
       </sidebar-link>
       <sidebar-link to="/admin/trades-list">
         <i class="nc-icon nc-circle-09"></i>
-        <p>Trade Perosn</p>
+        <p>Trade Persons</p>
       </sidebar-link>
       <sidebar-link to="/admin/property-list">
         <i class="nc-icon nc-istanbul"></i>
-        <p>Property list</p>
+        <p>Properties list</p>
       </sidebar-link>
-      <sidebar-link to="/admin/property-expense">
-        <i class="nc-icon nc-paper-2"></i>
-        <p>Property Expense</p>
+      <sidebar-link to="/admin/admin-complaints">
+        <i class="nc-icon nc-istanbul"></i>
+        <p>Complaints list</p>
       </sidebar-link>
-   
-      <!--   <sidebar-link to="/admin/icons">
-        <i class="nc-icon nc-atom"></i>
-        <p>Icons</p>
+      </div>
+      <div v-if="currentUser.email_verified_at && currentUser.phone_no_verified_at && currentUser.role_id==4">
+      <mobile-menu slot="content"></mobile-menu>
+      <sidebar-link to="/admin/overview">
+        <i class="nc-icon nc-chart-pie-35"></i>
+        <p>Dashboard</p>
       </sidebar-link>
-      <sidebar-link to="/admin/maps">
-        <i class="nc-icon nc-pin-3"></i>
-        <p>Maps</p>
+      <sidebar-link to="/admin/tenant-complaints">
+        <i class="nc-icon nc-chart-pie-35"></i>
+        <p>Complaints</p>
       </sidebar-link>
-      <sidebar-link to="/admin/notifications">
-        <i class="nc-icon nc-bell-55"></i>
-        <p>Notifications</p>
-      </sidebar-link> -->
+      <sidebar-link to="/admin/finance">
+        <i class="nc-icon nc-chart-pie-35"></i>
+        <p>Finance</p>
+      </sidebar-link>
+      <sidebar-link to="/admin/property-doc">
+        <i class="nc-icon nc-chart-pie-35"></i>
+        <p>Property Doc</p>
+      </sidebar-link>
+    </div>
     </side-bar>
     <div class="main-panel">
       <top-navbar></top-navbar>
@@ -67,12 +75,14 @@
   import ContentFooter from './ContentFooter.vue'
   import DashboardContent from './Content.vue'
   import MobileMenu from './MobileMenu.vue'
+import SidebarLink from '../components/SidebarPlugin/SidebarLink.vue'
   export default {
     components: {
       TopNavbar,
       ContentFooter,
       DashboardContent,
-      MobileMenu
+      MobileMenu,
+        SidebarLink
     },
     data () {
       return {
@@ -81,6 +91,7 @@
     },
     mounted(){
       this.currentUser = JSON.parse(localStorage.getItem('user'))
+      console.log(this.currentUser)
     },
     methods: {
       toggleSidebar () {

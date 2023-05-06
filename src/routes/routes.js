@@ -20,10 +20,16 @@ import AddOwnerForm from 'src/pages/Owner/AddOwnerForm'
 import EditOwnerForm from 'src/pages/Owner/EditOwnerForm'
 
 import Property from 'src/pages/Property/TableList'
+import PropertyImages from 'src/pages/Property/Images'
+import PropertyView from 'src/pages/Property/View'
 import AddPropertyForm from 'src/pages/Property/AddPropertyForm'
 import EditPropertyForm from 'src/pages/Property/EditPropertyForm'
 
 import AddNewRoom from 'src/pages/Property/AddRoomForm'
+import EditNewRoom from 'src/pages/Property/EditRoomForm'
+import AddMoreRoom from 'src/pages/Property/AddMoreRoom'
+import AddMaintenance from 'src/pages/Property/Maintenance'
+import AddNewMaintenance from 'src/pages/Property/AddMaintenance'
 
 import Tenants from 'src/pages/Tenants/TableList'
 import AddTenantsForm from 'src/pages/Tenants/AddTenantsForm'
@@ -44,6 +50,13 @@ import EditUserForm from 'src/pages/User/EditUserForm'
 import ListDoc from 'src/pages/PropertyDoc/TableList'
 import AddNewDoc from 'src/pages/PropertyDoc/AddDocForm'
 import EditNewDoc from 'src/pages/PropertyDoc/EditDocForm'
+import AddCash from 'src/pages/AddCash'
+import adminComplaints from 'src/pages/Complaints/TableList'
+import viewComplaints from 'src/pages/Complaints/View'
+//tenant route
+import TenantComplaints from 'src/tenant/complaints/TableList'
+import addComplaints from 'src/tenant/complaints/AddUserForm'
+import editComplaints from 'src/tenant/complaints/EditUserForm'
 
 const routes = [
   {
@@ -75,6 +88,11 @@ const routes = [
         path: 'overview',
         name: 'Overview',
         component: Overview
+      },
+      {
+        path: 'add-cash/:id/:type',
+        name: 'AddCash',
+        component: AddCash
       },
       {
         path: 'owner-list',
@@ -130,6 +148,26 @@ const routes = [
         component: Property
       },
       {
+        path: 'property-image/:id',
+        name: 'PropertyImages',
+        component: PropertyImages
+      },
+      {
+        path:'maintenance/:id',
+        name: 'AddMaintenance',
+        component: AddMaintenance
+      },
+      {
+        path:'add-maintenance/:id',
+        name: 'AddNewMaintenance',
+        component: AddNewMaintenance
+      },
+      {
+        path: 'property-view/:id',
+        name: 'PropertyView',
+        component: PropertyView
+      },
+      {
         path: 'new-property',
         name: 'Add New Property',
         component: AddPropertyForm
@@ -143,6 +181,16 @@ const routes = [
         path: 'add-amenities/:id',
         name: 'AddNewRoom',
         component: AddNewRoom
+      },
+      {
+        path: 'edit-amenities/:id',
+        name: 'EditNewRoom',
+        component: EditNewRoom
+      },
+      {
+        path: 'add-more-room/:id',
+        name: 'AddMoreRoom',
+        component: AddMoreRoom
       },
       {
         path: 'doc-list/:id',
@@ -160,7 +208,7 @@ const routes = [
         component: EditNewDoc
       },
       {
-        path: 'property-expense/',
+        path: 'property-expense/:id',
         name: 'PropertyExpense',
         component: Expense
       },
@@ -196,30 +244,40 @@ const routes = [
         component: UserProfile
       },
       {
-        path: 'typography',
-        name: 'Typography',
-        component: Typography
+        path: 'admin-complaints',
+        name: 'adminComplaints',
+        component: adminComplaints
       },
       {
-        path: 'icons',
-        name: 'Icons',
-        component: Icons
+        path: 'view-complaint/:id',
+        name: 'viewComplaints',
+        component: viewComplaints
       },
       {
-        path: 'maps',
-        name: 'Maps',
-        component: Maps
+        path: 'tenant-complaints',
+        name: 'TenantComplaints',
+        component: TenantComplaints
       },
       {
-        path: 'notifications',
-        name: 'Notifications',
-        component: Notifications
+        path: 'add-conplaint',
+        name: 'addComplaints',
+        component: addComplaints
       },
       {
-        path: 'upgrade',
-        name: 'Upgrade to PRO',
-        component: Upgrade
-      }
+        path: 'edit-conplaint/:id',
+        name: 'editComplaints',
+        component: editComplaints
+      },
+      {
+        path: 'finance',
+        name: 'addComplaints',
+        component: TenantComplaints
+      },
+      {
+        path: 'property-doc',
+        name: 'addComplaints',
+        component: TenantComplaints
+      },
     ]
   },
   { path: '*', component: NotFound }

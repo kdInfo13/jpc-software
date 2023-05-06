@@ -6,7 +6,7 @@
           <card class="card-plain">
           <div class="row">
             <div class="col-6"><h4 class="card-title">Property Expense List</h4></div>
-            <div class="col-6"><router-link class="d-flex justify-content-end" to="/admin/new-property-expense">Add New</router-link></div>
+            <div class="col-6"><router-link class="d-flex justify-content-end" :to="{ path: '/admin/new-property-expense/'+ property_id}">Add New</router-link></div>
           </div>
             <div class="table-responsive">
               <table class="table">
@@ -14,6 +14,7 @@
                     <slot name="columns">
                       <tr>
                         <th>S.no</th>
+                        <th>Expense</th>
                         <th>Property Name</th>
                         <th>Amount</th>
                         <th>Created Date</th>
@@ -25,6 +26,7 @@
                   <tr v-for="(item, index) in tableData" :key="index">
                     <slot :row="item">
                       <td>{{index+1}}</td>
+                      <td>{{ item.name }}</td>
                       <td>{{item.property.name}}</td>
                       <td>${{item.amount}}</td>
                       <td> {{ item.created_at | formatDate }}</td>
@@ -61,17 +63,19 @@
     },
     data () {
       return {
+        property_id:'',
         loading: false,
         tableData : []
       }
     },
     mounted(){
-      this._getExpense();
+      this.property_id=this.$route.params.id
+      this._getExpense(this.$route.params.id);
     },
     methods: {
-      _getExpense(){
+      _getExpense(id){
         this.loading=true;
-          axios.get(process.env.VUE_APP_API_URL+'expense-list',{
+          axios.get(process.env.VUE_APP_API_URL+'expense-list/'+id,{
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization' : 'Bearer '+ localStorage.getItem('token')

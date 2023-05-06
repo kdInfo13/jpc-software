@@ -6,7 +6,6 @@
             <card>
               <h4 slot="header" class="card-title">Property Documents</h4>
               <form>
-                <div>
                   <div class="row">
                     <div class="col-md-4">
                       <label>Type</label>
@@ -14,16 +13,16 @@
                         <option v-for="(item, index) in propertyType" :key="index" :value="index">{{ item }}</option>
                       </select>
                     </div>
+                    <div class="col-md-4" v-if="form.type==10">
+                      <label>Other Doc Name</label>
+                      <input type="text" v-model="form.other_doc" class="form-control" placeholder="Other Doc Name">
+                    </div>
                     <div class="col-md-4">
                       <label>Care Taker Name</label>
                       <input type="text" v-model="form.care_taker_name" class="form-control" placeholder="care taker name">
                       <div v-if="isSubmitted && $v.form.care_taker_name.$error" class="invalid-feedback">
                         <span v-if="!$v.form.care_taker_name.required">Care taker field is required.</span>
                       </div>
-                    </div>
-                    <div class="col-md-4">
-                      <label>File</label>
-                      <input type="file" @change="onFileChange">
                     </div>
                   </div>
                   <div class="row">
@@ -41,10 +40,25 @@
                         <span v-if="!$v.form.end_date.required">End date field is required.</span>
                       </div>
                     </div>
-                    <div class="col-md-4">
-                      <img :src="form.pdf_name">
-                    </div>
+              
                   </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <label>Documents Image</label><br>
+                    <div class="dropbox">
+                      <input type="file"  @change="onFileChange" class="input-file">
+                        <p v-if="!form.pdf_name">
+                          Drag your file(s) here to begin<br> or click to browse
+                        </p>
+                        <div class="row">
+                          <div class="col-md-4 square" v-if="form.pdf_name">
+                            <img :src="imagePath+form.pdf_name">
+                          </div>
+                        </div>
+                    </div>
+                    <ajax-loader v-if="loadingRoom"></ajax-loader>
+                    </div>
                 </div>
               
                 <div class="row mt-4">
@@ -94,9 +108,11 @@ import AjaxLoader from '../../AjaxLoader.vue';
     },
     data () {
       return {
+        imagePath:'',
         isSubmitted:false,
         propertyType:[],
         loading:false,
+        loadingRoom:false,
         form: {
           id:'',
           property_id: '',
@@ -119,10 +135,18 @@ import AjaxLoader from '../../AjaxLoader.vue';
       }
     },
     mounted() {
+      this.imagePath = process.env.VUE_APP_IMAGE
       this.getOwner(this.$route.params.id);
       this._getType()
     },
     methods: {
+      onTypeChange(event){
+        if(event.target.value==10){
+
+        }else{
+          this.form.other_doc=''
+        }
+      },
       _getType(){
           this.loading=true;
           axios.get(process.env.VUE_APP_API_URL+'document-types',{

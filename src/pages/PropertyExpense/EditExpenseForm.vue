@@ -7,16 +7,20 @@
             <h4 slot="header" class="card-title">Edit Property Expense</h4>
             <form v-if="!loading">
               <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-3">
                   <label>Select Type</label>
                   <select class="form-control" v-model="form.type">
-                    <option value="1">Property name 1</option>
+                    <option  v-for="(index, i) in typeList" :key="i" :value="i">{{ index }}</option>
                   </select>
                   <div v-if="isSubmitted && $v.form.type.$error" class="invalid-feedback">
                     <span v-if="!$v.form.type.required">Select type.</span>
+                  </div>
                 </div>
-                </div>
-                <div class="col-md-4">
+                <div class="col-md-3" v-if="form.type==7">
+                    <label>Other Expense Name</label>
+                    <input type="text" v-model="form.other_expense" class="form-control" placeholder="Other Expense Name">
+                  </div>
+                <div class="col-md-3">
                   <base-input type="type"
                             label="Name"
                             placeholder="Name"
@@ -26,10 +30,11 @@
                       <span v-if="!$v.form.name.required">Name field is required.</span>
                   </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                   <label>who is paying</label>
                   <select v-model="form.who_is_paying" class="form-control">
-                    <option value="1">Tenant</option>
+                    <option value="Jason">Jason</option>
+                    <option value="Investor">Investor</option>
                   </select>
                     <div v-if="isSubmitted && $v.form.who_is_paying.$error" class="invalid-feedback">
                       <span v-if="!$v.form.who_is_paying.required">who is paying field is required.</span>
@@ -38,7 +43,7 @@
               </div>
 
               <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-3">
                   <base-input type="number"
                   label="Amount"
                   placeholder="Amount"
@@ -48,7 +53,7 @@
                       <span v-if="!$v.form.amount.required">amount field is required.</span>
                   </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                   <base-input type="date"
                   label="Payment date"
                   placeholder="Payment date"
@@ -58,16 +63,24 @@
                       <span v-if="!$v.form.payment_date.required">payment date field is required.</span>
                   </div>
                 </div>
-                <div class="col-md-4">
-                  <base-input type="text"
-                  label="invoice"
-                  placeholder="invoice"
-                  v-model="form.invoice"
-                  ></base-input>
-                  <div v-if="isSubmitted && $v.form.invoice.$error" class="invalid-feedback">
-                      <span v-if="!$v.form.invoice.required">invoice field is required.</span>
+                <div class="col-md-6">
+                  <label>Invoice Images</label><br>
+                  <div class="dropbox">
+                    <input type="file" multiple  @change="onFileChange" class="input-file">
+                      <p v-if="!form.invoice">
+                        Drag your file(s) here to begin<br> or click to browse
+                      </p>
+                      <div class="row">
+                        <div class="col-md-12 square" v-if="form.invoice">
+                          <img :src="imagePath+form.invoice">
+                        </div>
+                      </div> 
                   </div>
-                </div>
+                  <ajax-loader v-if="loadingRear"></ajax-loader>
+                  <div v-if="isSubmitted && $v.form.invoice.$error" class="invalid-feedback">
+                    <span v-if="!$v.form.invoice.required">invoice field is required.</span>
+                  </div>
+                  </div>
               </div>
               <div class="row">
                 <div class="col-md-12">
@@ -110,6 +123,9 @@ export default {
   },
   data () {
     return {
+      imagePath:'',
+      loadingRear:false,
+      typeList:'',
       form: {
         property_id: '',
         type: '',
@@ -118,7 +134,8 @@ export default {
         amount: '',
         payment_date: '',
         invoice:'',
-        remarks:''
+        remarks:'',
+        other_expense:''
       },
       isSubmitted: false,
       loading:false
@@ -136,9 +153,76 @@ export default {
     }
   },
   mounted() {
+    this.imagePath = process.env.VUE_APP_IMAGE
     this._getExpens(this.$route.params.id);
+    this.getType()
   },
   methods: {
+    onTypeChange(event){
+      if(event.target.value==7){
+
+      }else{
+        this.form.other_expense=''
+      }
+    },
+    onFileChange(event) {
+        event.preventDefault();
+        let currentObj = this;
+        const config = {
+            headers: { 'content-type': 'multipart/form-data' }
+        }
+        let formData = new FormData();
+        formData.append('image', event.target.files[0]);
+        formData.append('path', 'invoice');
+        formData.append('key', 'pdf_name');
+        this.loadingRear=true;
+        axios.post(process.env.VUE_APP_API_URL+'upload_image', formData, config)
+        .then(function (response) {
+            if(response.data.status){
+              currentObj.form.invoice = response.data.url;
+            }
+        })
+        .catch(error => {
+          this.$notifications.notify(
+                  {
+                    message: `<span>`+error+`</span>`,
+                    icon: 'nc-icon nc-bell-55',
+                    horizontalAlign: 'right',
+                    verticalAlign: 'top',
+                    type: 'danger'
+                  })
+          }).finally( () => {
+            this.loadingRear=false;
+        })
+      },
+    getType(){
+        this.loading=true;
+          axios.get(process.env.VUE_APP_API_URL+'expense-type',{
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization' : 'Bearer '+ localStorage.getItem('token')
+            }
+          })
+          .then(response => {
+              if(response.status==200 && response.data.documentTypes){
+                this.typeList = response.data.documentTypes
+              }
+              this.loading=false;
+          })
+          .catch(error => {
+            this.$notifications.notify(
+            {
+              message: `<span>Something went wrong.</span>`,
+              icon: 'nc-icon nc-bell-55',
+              horizontalAlign: 'right',
+              verticalAlign: 'top',
+              type: 'danger'
+            })
+              this.loading=false;
+          }).finally( () => {
+              this.loading = false
+          })
+      },
     _getExpens(id){
       this.loading = true;
       axios.get(process.env.VUE_APP_API_URL+'expense/'+id+'/edit', { 

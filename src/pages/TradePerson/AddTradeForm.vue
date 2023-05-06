@@ -15,7 +15,7 @@
                     </base-input>
                     <div v-if="isSubmitted && $v.form.name.$error" class="invalid-feedback">
                       <span v-if="!$v.form.name.required">Full name field is required.</span>
-                  </div>
+                    </div>
                   </div>
                   <div class="col-md-4">
                     <base-input type="email"
@@ -143,58 +143,58 @@ import {
                 'Authorization' : 'Bearer '+ localStorage.getItem('token')
             },
             })
-            .then(response => {
-              this.loading=false;
-              this.isSubmitted=false;
-              console.log(response)
-              if(response.status == 200 && response.data){
-                this.$notifications.notify(
-                {
-                  message: '<span>New trade person addedd successfully.</span>',
-                  icon: 'nc-icon nc-bell-55',
-                  horizontalAlign: 'right',
-                  verticalAlign: 'top',
-                  type: 'success'
-                })
-                this.$router.push({name: 'TradesList'});
-              }else{
-                this.$notifications.notify(
-                {
-                  message: '<span>'+response.data.error_message+'</span>',
-                  icon: 'nc-icon nc-bell-55',
-                  horizontalAlign: 'right',
-                  verticalAlign: 'top',
-                  type: 'danger'
-                })
-              }
-           
+        .then(response => {
+          this.loading=false;
+          this.isSubmitted=false;
+          console.log(response)
+          if(response.status == 200 && response.data){
+            this.$notifications.notify(
+            {
+              message: '<span>New trade person added successfully.</span>',
+              icon: 'nc-icon nc-bell-55',
+              horizontalAlign: 'right',
+              verticalAlign: 'top',
+              type: 'success'
             })
-            .catch(error => {
-              if(error.response.status == 422){
-                this.$notifications.notify(
-                {
-                  message: `<span>`+error.response.data.message+`</span>`,
-                  icon: 'nc-icon nc-bell-55',
-                  horizontalAlign: 'right',
-                  verticalAlign: 'top',
-                  type: 'danger'
-                })
-              }else{
-                this.$notifications.notify(
-                {
-                  message: `<span>Something went wrong.</span>`,
-                  icon: 'nc-icon nc-bell-55',
-                  horizontalAlign: 'right',
-                  verticalAlign: 'top',
-                  type: 'danger'
-                })
-              }
-                this.isSubmitted=false;
-                this.loading=false;
-            }).finally( () => {
-                this.isSubmitted = false
-                this.loading=false;
+            this.$router.push({name: 'TradesList'});
+          }else{
+            this.$notifications.notify(
+            {
+              message: '<span>'+response.data.error_message+'</span>',
+              icon: 'nc-icon nc-bell-55',
+              horizontalAlign: 'right',
+              verticalAlign: 'top',
+              type: 'danger'
             })
+          }
+        
+        })
+        .catch(error => {
+          if(error.response.status == 422){
+            this.$notifications.notify(
+            {
+              message: `<span>`+error.response.data.message+`</span>`,
+              icon: 'nc-icon nc-bell-55',
+              horizontalAlign: 'right',
+              verticalAlign: 'top',
+              type: 'danger'
+            })
+          }else{
+            this.$notifications.notify(
+            {
+              message: `<span>Something went wrong.</span>`,
+              icon: 'nc-icon nc-bell-55',
+              horizontalAlign: 'right',
+              verticalAlign: 'top',
+              type: 'danger'
+            })
+          }
+            this.isSubmitted=false;
+            this.loading=false;
+        }).finally( () => {
+            this.isSubmitted = false
+            this.loading=false;
+        })
       }
     }
   }

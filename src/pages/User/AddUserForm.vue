@@ -68,7 +68,7 @@
                         <span v-if="!$v.user.password.required">Password field is required.</span>
                       </div>
                   </div>
-                  <div class="col-md-4" v-if="showPermission">
+                  <div class="col-md-4" v-if="showPermission && this.currentUser.role_id==1">
                     <label>Select Admin</label>
                     <select v-model="user.admin_id" class="form-control">
                       <option v-for="index in admins" :key="index.id" :value="index.id">{{ index.name }}</option>
@@ -117,7 +117,10 @@
     },
     data () {
       return {
-        roles:'',
+        roles:{
+          2:'Admin',
+          3:'Manager'
+        },
         permissions:'',
         currentUser:'',
         showPermission: false,
@@ -147,9 +150,13 @@
     },
     mounted(){
       this.currentUser =  JSON.parse(localStorage.getItem('user'));
-      this._getRole();
       this._getPermission();
-      this._getAdmin();
+      if(this.currentUser.role_id==1){
+        this._getAdmin();
+      }
+      if(this.currentUser.role_id==2){
+        this.user.admin_id = this.currentUser.id
+      }
     },
     methods: {
       onChange(event){
@@ -205,28 +212,7 @@
 
         })
       },
-      _getRole(){
-        axios.get(process.env.VUE_APP_API_URL+'roles', {
-          headers: {
-            'Authorization' : 'Bearer '+ localStorage.getItem('token')
-          },
-        }).then(response => {
-          if(response.data){
-            this.roles = response.data.roles
-          }
-        }).catch(error => {
-          this.$notifications.notify(
-          {
-            message: '<span>Somethign went wrong.</span>',
-            icon: 'nc-icon nc-bell-55',
-            horizontalAlign: 'right',
-            verticalAlign: 'top',
-            type: 'danger'
-          })
-        }).finally( () =>{
-
-        })
-      },
+   
       saveProfile () {
         
         this.isSubmitted = true;
@@ -261,7 +247,11 @@
                   verticalAlign: 'top',
                   type: 'success'
                 })
-                this.$router.push({name: 'User'});
+                if(this.user.role_id == 2){
+                  window.location.href = "/admin/user-list"
+                }else{
+                  window.location.href = "/admin/user-list#manager-list"
+                }
               }else{
                 this.$notifications.notify(
                 {

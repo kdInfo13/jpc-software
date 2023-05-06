@@ -1,8 +1,8 @@
 <template>
   <div class="content">
     <div class="container-fluid">
-      <div class="row">
-        <div class="col-xl-3 col-md-6" v-if="currentUser.role_id==1"  @click.prevent="directLink('User')">
+      <div class="row" v-if="currentUser.email_verified_at && currentUser.phone_no_verified_at && (currentUser.role_id==1 || currentUser.role_id==2 || currentUser.role_id==3)">
+        <div class="col-xl-3 col-md-6" v-if="currentUser.role_id==1"  @click.prevent="directLink('admin')">
           <stats-card>
             <div slot="header" class="icon-warning">
               <i class="nc-icon nc-circle-09 text-warning"></i>
@@ -16,7 +16,7 @@
           </stats-card>
         </div>
 
-        <div class="col-xl-3 col-md-6" @click.prevent="directLink('User')">
+        <div class="col-xl-3 col-md-6" v-if="currentUser.role_id==1 || currentUser.role_id==2"  @click.prevent="directLink('manager')">
           <stats-card>
             <div slot="header" class="icon-success">
               <i class="nc-icon nc-circle-09 text-success"></i>
@@ -98,27 +98,46 @@
           </stats-card>
         </div>
       </div>
-
-      <div class="row">
-        <div class="col-md-12">
-          <chart-card :chart-data="lineChart.data"
-                      :chart-options="lineChart.options"
-                      :responsive-options="lineChart.responsiveOptions">
-            <template slot="header">
-              <h4 class="card-title">Finances Charts</h4>
-              <p class="card-category">{{new Date().getFullYear()}} performance</p>
-            </template>
-            <template slot="footer">
-              <div class="legend">
-                <i class="fa fa-circle text-info"></i> Earning
-                <i class="fa fa-circle text-danger"></i> Expenses
-              </div>
-              <hr>
-              <div class="stats">
-                <i class="fa fa-history"></i> Updated every month
-              </div>
-            </template>
-          </chart-card>
+      <div class="row" v-if="!currentUser.email_verified_at || !currentUser.phone_no_verified_at && currentUser.role_id==4 || currentUser.role_id==2 || currentUser.role_id==3">
+        <otp></otp>
+      </div>
+      <div class="row" v-if="currentUser.email_verified_at && currentUser.phone_no_verified_at && currentUser.role_id==4">
+        <div class="col-xl-6 col-md-6">
+          <card>
+            <h4>Your Details</h4>
+            <ul class="list-group">
+              <li class="list-group-item"><strong>Reference:</strong> {{ dashboard.tanent_details.reference }}</li>
+              <li class="list-group-item"><strong>Profile Name:</strong> {{ dashboard.name }}</li>
+              <li class="list-group-item"><strong>Email:</strong> {{ dashboard.email }} <span v-if="dashboard.email_verified_at" class="badge badge-success">Verified</span></li>
+              <li class="list-group-item"><strong>Phone:</strong> {{ dashboard.phone_no }} <span v-if="dashboard.phone_no_verified_at" class="badge badge-success">Verified</span></li>
+              <li class="list-group-item"><strong>Profile Name:</strong> {{ dashboard.name }}</li>
+              <li class="list-group-item"><strong>ID prof Doc.</strong> <a target="_blank" :href="imagePath+dashboard.tanent_details.id_proof"> View</a></li>
+            </ul>
+          </card>
+        </div>
+        <div class="col-xl-6 col-md-6">
+          <card>
+            <h4>Rent Details</h4>
+            <ul class="list-group">
+              <li class="list-group-item"><strong>Deposite Amount:</strong> {{ dashboard.tanent_details.deposite_amount }}</li>
+              <li class="list-group-item"><strong>Deposite Date:</strong> {{ dashboard.tanent_details.deposite_date }}</li>
+              <li class="list-group-item"><strong>Tanency Period:</strong> {{ dashboard.tanent_details.tanency_period }}</li>
+              <li class="list-group-item"><strong>Tanency Start Date:</strong> {{ dashboard.tanent_details.tanency_start_date }}</li>
+              <li class="list-group-item"><strong>Tanency End Date:</strong> {{ dashboard.tanent_details.tanency_end_date }}</li>
+              <li class="list-group-item"><strong>Rent Amount:</strong> {{ dashboard.tanent_details.rent_amount }}</li>
+              <li class="list-group-item"><strong>Rent Date Per Month:</strong> {{ dashboard.tanent_details.rent_date }}</li>
+            </ul>
+          </card>
+        </div>
+        <div class="col-xl-12 col-md-12">
+          <card>
+            <h4>Property Details</h4>
+            <ul class="list-group">
+              <li class="list-group-item"><strong>Name:</strong> {{ dashboard.tanent_details.property.name }}</li>
+              <li class="list-group-item"><strong>Address:</strong> {{ dashboard.tanent_details.property.door_no }} {{ dashboard.tanent_details.property.street }}, {{ dashboard.tanent_details.property.area }}, {{ dashboard.tanent_details.property.county }}, {{ dashboard.tanent_details.property.postcode }}</li>
+              <li class="list-group-item"><strong>Room Detail:</strong>{{ dashboard.tanent_details.room.name }}</li>
+            </ul>
+          </card>
         </div>
       </div>
     </div>
@@ -128,20 +147,24 @@
   import ChartCard from 'src/components/Cards/ChartCard.vue'
   import StatsCard from 'src/components/Cards/StatsCard.vue'
   import LTable from 'src/components/Table.vue'
+  import Otp from 'src/pages/Otp'
   import axios from "axios";
 
   export default {
     components: {
       LTable,
       ChartCard,
-      StatsCard
+      StatsCard,
+      Otp
     },
     data () {
       return {
+        imagePath:'',
         dashboard:'',
         currentUser:'',
         editTooltip: 'Edit Task',
         deleteTooltip: 'Remove',
+        uer:'',
         lineChart: {
           data: {
             labels: ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'August', 'Sept', 'Oct', 'Nov', 'Dec'],
@@ -180,14 +203,28 @@
     },
     mounted(){
       this.currentUser = JSON.parse(localStorage.getItem('user'))
+      console.log(this.currentUser)
       this._getDashboard();
+      this.imagePath = process.env.VUE_APP_IMAGE
     },
     methods:{
       directLink(nameP){
-        this.$router.push({name: nameP});
+        if(nameP==='admin'){
+          window.location.href = "/admin/user-list"
+        }else if(nameP==='manager'){
+          window.location.href = "/admin/user-list#manager-list"
+        }else{
+          this.$router.push({name: nameP});
+        }
       },
       _getDashboard(){
-        axios.get(process.env.VUE_APP_API_URL+'dashboard', {
+        if(this.currentUser.role_id==1 || this.currentUser.role_id==2){
+          this.url = process.env.VUE_APP_API_URL+'dashboard';
+        }
+        if(this.currentUser.role_id==4){
+           this.url = process.env.VUE_APP_API_URL+'tenant-dashboard';
+        }
+        axios.get(this.url, {
           headers: {
             'Authorization' : 'Bearer '+ localStorage.getItem('token')
           },

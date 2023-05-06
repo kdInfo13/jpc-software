@@ -5,7 +5,7 @@
         <div class="col-12">
           <card class="card-plain">
           <div class="row">
-            <div class="col-6"><h4 class="card-title">Owner / Investors List</h4></div>
+            <div class="col-6"><h4 class="card-title">Landlord / Investors List</h4></div>
             <div class="col-6"><router-link class="d-flex justify-content-end" to="/admin/new-owner">Add New</router-link></div>
           </div>
             <div class="table-responsive">

@@ -5,18 +5,22 @@
         <div class="col-12">
           <card class="card-plain">
           <div class="row">
-            <div class="col-6"><h4 class="card-title">Trader List</h4></div>
-            <div class="col-6"><router-link class="d-flex justify-content-end" to="/admin/new-trade">Add New</router-link></div>
+            <div class="col-6">
+             
+            </div>
+            <div class="col-6"><router-link class="d-flex justify-content-end" to="/admin/add-conplaint">Add New</router-link></div>
           </div>
-            <div class="table-responsive">
+          <div class="table-responsive" v-if="!loading && currentuser">
               <table class="table">
                   <thead>
                     <slot name="columns">
                       <tr>
                         <th>S.No</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
+                        <th>Prority</th>
+                        <th>Property</th>
+                        <th>Description</th>
+                        <th>Remarks</th>
+                        <th>Status</th>
                         <th>Action</th>
                       </tr>
                     </slot>
@@ -25,12 +29,21 @@
                   <tr v-for="(item, index) in tableData" :key="index">
                     <slot :row="item">
                       <td>{{index+1}}</td>
-                      <td>{{item.name}}</td>
-                      <td>{{item.email}}</td>
-                      <td>{{item.phone_no}}</td>
                       <td>
-                        <router-link class="btn btn-info p-2" :to="{ path: '/admin/edit-trade/'+ item.id}">Edit</router-link>
-                        <button type="submit" class="btn btn-danger p-1 ml-2" v-on:click="deleteProfile(item.id, index)">
+                        <span v-if="item.prority==1">High</span>
+                        <span v-if="item.prority==2">Medium</span>
+                        <span v-if="item.prority==3">Low</span>
+                      </td>
+                      <td>{{item.property.name}} - {{item.room.name}}</td>
+                      <td>{{ item.description }}</td>
+                      <td>{{ item.remarks }}</td>
+                      <td>
+                        <span v-if="item.status==1">Open</span>
+                        <span v-if="item.status==2">Closed</span>
+                      </td>
+                      <td>
+                        <!-- <router-link class="btn btn-info p-2" :to="{ path: '/admin/edit-conplaint/'+ item.id}">Edit</router-link> -->
+                        <button type="submit" class="btn btn-danger p-1 ml-2" @click.prevent="deleteProfile(item.id, index)">
                           Delete
                         </button>
                         
@@ -38,8 +51,8 @@
                     </slot>
                   </tr>
                   </tbody>
-                </table>
-                <ajax-loader v-if="loading"></ajax-loader>
+              </table>
+              <ajax-loader v-if="loading"></ajax-loader>
             </div>
           </card>
         </div>
@@ -61,25 +74,27 @@
     },
     data () {
       return {
-        tableData : [],
-        loading: false
+        currentuser:'',
+        loading: false,
+        tableData : ''
       }
     },
-    mounted (){
-        this._getTraders()
+    mounted() {
+      this._getUser()
+      this.currentuser = JSON.parse(localStorage.getItem('user'))
     },
     methods: {
-      _getTraders(){
-        this.loading=true;
-            axios.get(process.env.VUE_APP_API_URL+'trade-persons-list',{
+      _getUser(){
+            this.loading=true;
+            axios.get(process.env.VUE_APP_API_URL+'complaints',{
               headers: {
                   'Content-Type': 'application/json',
                   'Authorization' : 'Bearer '+ localStorage.getItem('token')
               }
             })
             .then(response => {
-                if(response.status==200 && response.data.tradePersons){
-                  this.tableData = response.data.tradePersons
+                if(response.status==200 && response.data.complaints){
+                  this.tableData = response.data.complaints
                 }
                 this.loading=false;
             })
@@ -99,7 +114,7 @@
       },
       deleteProfile (id, index) {
         if(confirm("Do you really want to delete?")){
-          axios.delete(process.env.VUE_APP_API_URL+'trade-person/'+id, {
+          axios.delete(process.env.VUE_APP_API_URL+'delete-complaint/'+id, {
           headers: {
                 'Content-Type': 'application/json',
                 'Authorization' : 'Bearer '+ localStorage.getItem('token')
@@ -115,6 +130,7 @@
                   type: 'success'
                 })
                 this.tableData.splice(index, 1);
+
             })
             .catch(error => {
               this.$notifications.notify(
@@ -127,9 +143,24 @@
                 })
             })
         }
-      },
+      }
     }
   }
 </script>
 <style>
+ul {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
+li.tabs-component-tab {
+    padding: 5px;
+}
+li.tabs-component-tab a{
+  color:#191818
+}
+li.tabs-component-tab.is-active a{
+  color:#1DC7EA
+}
 </style>
